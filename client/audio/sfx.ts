@@ -1,6 +1,7 @@
 import { ZZFX } from "zzfx";
 import type { Card, Element, FusionOutcome, TimingGrade } from "../../shared/types.js";
 import { audioCtx, buses } from "./engine.js";
+import { S } from "../state/store.js";
 
 /*
  * Sound effects are ZzFX parameter lists, synthesised once and cached. Paste a list into
@@ -216,6 +217,7 @@ export function cryParams(card: Pick<Card, "name" | "els">): Params {
 }
 
 export function cry(card: Pick<Card, "name" | "els">, opts?: PlayOpts) {
+  if (!S.audio.cries) return;
   playParams(`cry:${card.name}:${card.els.join()}`, cryParams(card), opts);
 }
 
