@@ -3,6 +3,10 @@ import { DECK_START, TEAM_SIZE, randomMonsters } from "../../shared/data/cards.j
 import { DEFAULT_TUNING } from "../../shared/tuning.js";
 
 export interface Stats { battles: number; wins: number; turns: number[]; crit: number; normal: number; botch: number; perfect: number; good: number; miss: number }
+/** Volumes are 0 to 1. `cries` turns monster calls on or off. */
+export interface AudioSettings { master: number; music: number; sfx: number; cries: boolean }
+export const DEFAULT_AUDIO: AudioSettings = { master: 1, music: 1, sfx: 0.8, cries: true };
+
 export interface GameState {
   deck: Card[];
   party: string[];
@@ -12,6 +16,7 @@ export interface GameState {
   /** Animation speed in battles. */
   speed: number;
   muted: boolean;
+  audio: AudioSettings;
 }
 
 const KEY = "fusion-game-v2";
@@ -21,7 +26,7 @@ const freshStats = (): Stats => ({ battles: 0, wins: 0, turns: [], crit: 0, norm
 
 export function freshGame(tuning: Tuning = { ...DEFAULT_TUNING }): GameState {
   const deck = randomMonsters(DECK_START, Math.random);
-  return { deck, party: deck.slice(0, TEAM_SIZE).map(c => c.id), beaten: [], stats: freshStats(), tuning, speed: 1, muted: false };
+  return { deck, party: deck.slice(0, TEAM_SIZE).map(c => c.id), beaten: [], stats: freshStats(), tuning, speed: 1, muted: false, audio: { ...DEFAULT_AUDIO } };
 }
 
 function load(): GameState {
@@ -29,7 +34,7 @@ function load(): GameState {
     const raw = localStorage.getItem(KEY);
     if (raw) {
       const s = JSON.parse(raw) as GameState;
-      if (Array.isArray(s.deck) && s.deck.length) return { ...freshGame(), ...s, tuning: { ...DEFAULT_TUNING, ...s.tuning }, stats: { ...freshStats(), ...s.stats } };
+      if (Array.isArray(s.deck) && s.deck.length) return { ...freshGame(), ...s, tuning: { ...DEFAULT_TUNING, ...s.tuning }, stats: { ...freshStats(), ...s.stats }, audio: { ...DEFAULT_AUDIO, ...s.audio } };
     }
   } catch { /* storage blocked or corrupt: start fresh */ }
   return freshGame();
@@ -42,7 +47,7 @@ export function save() {
 }
 
 export function resetGame() {
-  Object.assign(S, freshGame(S.tuning), { speed: S.speed, muted: S.muted });
+  Object.assign(S, freshGame(S.tuning), { speed: S.speed, muted: S.muted, audio: S.audio });
   save();
 }
 
