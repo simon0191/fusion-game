@@ -31,4 +31,12 @@ In dev builds the browser console has `__fusion.battle("vex")` to jump into a fi
 
 ## Hosting
 
-Vercel. The Vite build is served as static files and `api/index.ts` runs as a Vercel Function. API keys (`ANTHROPIC_API_KEY`, `HIGGSFIELD_API_KEY`) live only in server environment variables; see `.env.example`.
+Live at https://fusion-game-five.vercel.app (Vercel project `simon-sorianos-projects/fusion-game`).
+
+Deploys run through Vercel's GitHub integration, with no tokens or GitHub Actions:
+- Every push or merge to `main` deploys to production.
+- Other branches and pull requests get preview deployments.
+
+The Vite build is served as static files and `api/index.ts` runs as a Vercel Function. Vercel runs it as unbundled Node ES modules, so relative imports need a `.js` extension (`import app from "../server/app.js"`); TypeScript and Vite map these to the `.ts` files.
+
+API keys (`ANTHROPIC_API_KEY`, `HIGGSFIELD_API_KEY`) will live only in the Vercel project's environment variables; see `.env.example`. None are needed yet.
