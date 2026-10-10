@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { STYLE } from "./style.js";
-import { DEMO_GEMINI_KEY } from "./demo-key.js";
 
-export const geminiKey = () => process.env.GEMINI_API_KEY || DEMO_GEMINI_KEY;
+/** The Gemini key comes only from the environment: .env.local locally, project settings on Vercel. */
+export const geminiKey = () => process.env.GEMINI_API_KEY;
 
 /**
  * Fused monster art from the Gemini API (Nano Banana 2 Lite, about 5-6 s per image in X-016).
