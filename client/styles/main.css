@@ -62,7 +62,7 @@ button.card { transition: transform .15s; }
 .chip { font: 600 9px/1 var(--num); text-transform: uppercase; letter-spacing: .06em; padding: 3px 4px; border-radius: 4px; color: #fff; background: var(--c); }
 .card .art { aspect-ratio: 1; border-radius: 8px; background: radial-gradient(circle at 50% 60%, color-mix(in srgb, var(--el) 45%, #fff) 0%, color-mix(in srgb, var(--el) 25%, var(--card)) 70%); display: grid; place-items: center; overflow: hidden; }
 .card .art :is(svg, .pic) { width: 92%; height: 92%; }
-.pic { display: block; object-fit: contain; filter: drop-shadow(0 3px 3px rgba(0,0,0,.25)); transform: translateZ(0); backface-visibility: hidden; user-select: none; -webkit-user-select: none; }
+.pic { display: block; object-fit: contain; filter: drop-shadow(0 3px 3px rgba(0,0,0,.25)); user-select: none; -webkit-user-select: none; }
 .card .st { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
 .card .st div { background: color-mix(in srgb, var(--el) 14%, var(--card)); border-radius: 5px; padding: 3px 5px; display: grid; }
 .card .st b { font: 600 15px/1 var(--num); font-variant-numeric: tabular-nums; }
@@ -175,24 +175,17 @@ button.mchip.pickable { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 6
 @keyframes spin-in { 60% { transform: translateX(var(--dx)) rotateY(540deg) scale(.8); filter: brightness(2); } 100% { transform: translateX(var(--dx)) rotateY(900deg) scale(.2); opacity: 0; filter: brightness(4); } }
 .glow { position: absolute; width: 60px; height: 60px; border-radius: 50%; background: radial-gradient(circle, #fff, var(--accent) 40%, transparent 70%); opacity: 0; pointer-events: none; }
 .fusing .glow { animation: burst 1.9s ease-in forwards; }
-@keyframes burst { 70% { opacity: .9; transform: scale(3); } 100% { opacity: 1; transform: scale(9); } }
-/* While the API draws: both parents melt into each other inside a spinning ring of their element colours. */
-.melt { position: absolute; width: 190px; height: 190px; display: grid; place-items: center; opacity: 0; pointer-events: none; animation: melt-in .5s 1.5s forwards; }
-.melt .ring { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, var(--ca), var(--cb), var(--ca), var(--cb), var(--ca)); -webkit-mask: radial-gradient(circle, transparent 58%, #000 60%, #000 66%, transparent 68%); mask: radial-gradient(circle, transparent 58%, #000 60%, #000 66%, transparent 68%); animation: spin 1.6s linear infinite; filter: blur(1px) drop-shadow(0 0 10px var(--ca)); }
-.melt .core { position: absolute; inset: 22%; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--ca) 40%, #fff), transparent 70%); animation: breathe 1.6s ease-in-out infinite; }
-.melt img { position: absolute; width: 62%; height: 62%; object-fit: contain; animation: swap 2.4s ease-in-out infinite; }
-.melt img.b { animation-delay: -1.2s; }
-.melt .spark { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: #fff; box-shadow: 0 0 8px 2px var(--cb); animation: spark 1.6s linear infinite; }
-.melt .spark:nth-of-type(2) { animation-delay: -.4s; box-shadow: 0 0 8px 2px var(--ca); } .melt .spark:nth-of-type(3) { animation-delay: -.8s; } .melt .spark:nth-of-type(4) { animation-delay: -1.2s; box-shadow: 0 0 8px 2px var(--ca); }
-@keyframes melt-in { to { opacity: 1; } }
-@keyframes spin { to { transform: rotate(360deg); } }
-@keyframes breathe { 50% { transform: scale(1.25); opacity: .6; } }
-@keyframes swap { 0%, 100% { opacity: 1; transform: scale(1) rotate(-4deg); filter: blur(0); } 45%, 55% { opacity: 0; transform: scale(.85) rotate(4deg); filter: blur(6px) brightness(1.6); } }
-@keyframes spark { from { transform: rotate(0deg) translateX(92px) scale(1); opacity: 1; } to { transform: rotate(360deg) translateX(40px) scale(.2); opacity: 0; } }
+/* The glow flares and fades; it must not stay and cover the screen while the image is drawn. */
+@keyframes burst { 60% { opacity: .9; transform: scale(3); } 100% { opacity: 0; transform: scale(5); } }
+/* While the API draws: after the cards spin in, a slow swirl of three orbs keeps the stage alive. */
+.brew { position: absolute; width: 120px; height: 120px; opacity: 0; pointer-events: none; animation: brew-in .4s 1.7s forwards; }
+.brew i { position: absolute; inset: 0; margin: auto; width: 26px; height: 26px; border-radius: 50%; background: radial-gradient(circle, #fff, var(--accent) 45%, transparent 72%); animation: orbit 1.4s linear infinite; }
+.brew i:nth-child(2) { animation-delay: -.47s; background: radial-gradient(circle, #fff, var(--crit) 45%, transparent 72%); }
+.brew i:nth-child(3) { animation-delay: -.93s; background: radial-gradient(circle, #fff, #6ad1ff 45%, transparent 72%); }
+@keyframes brew-in { to { opacity: 1; } }
+@keyframes orbit { from { transform: rotate(0deg) translateX(46px) scale(1); } 50% { transform: rotate(180deg) translateX(30px) scale(1.5); } to { transform: rotate(360deg) translateX(46px) scale(1); } }
 .dots b { font-weight: 400; animation: blink 1.2s infinite; } .dots b:nth-child(2) { animation-delay: .2s; } .dots b:nth-child(3) { animation-delay: .4s; }
 @keyframes blink { 0%, 100% { opacity: .2; } 40% { opacity: 1; } }
-.flash { position: fixed; inset: 0; background: #fff; pointer-events: none; animation: flash .6s ease-out forwards; }
-@keyframes flash { from { opacity: .9; } to { opacity: 0; } }
 .reveal { animation: pop .5s cubic-bezier(.2,1.6,.4,1); }
 @keyframes pop { from { transform: scale(.3); opacity: 0; } }
 .outcome { font: 400 28px/1 var(--display); }
@@ -201,7 +194,11 @@ button.mchip.pickable { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 6
 .up { color: var(--good); } .down { color: var(--bad); }
 
 @media (min-width: 700px) { .row > * { flex-basis: 200px; } }
-@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01s !important; transition: none !important; } }
+/* Reduced motion: animations finish at once and never loop (a looping animation at .01s strobes).
+   The fusion stage is the game's key moment and keeps its normal pace. */
+@media (prefers-reduced-motion: reduce) {
+  *:not(.fuse-stage *), *:not(.fuse-stage *)::before, *:not(.fuse-stage *)::after { animation-duration: .01s !important; animation-iteration-count: 1 !important; transition: none !important; }
+}
 
 /* ---------- Thumb stick ---------- */
 .stick { position: fixed; width: 112px; height: 112px; margin: -56px 0 0 -56px; border-radius: 50%; background: rgba(14,27,34,.25); border: 2px solid rgba(255,255,255,.35); pointer-events: none; opacity: .45; transition: opacity .15s; }
