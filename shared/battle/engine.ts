@@ -71,7 +71,7 @@ export function attackOrder(b: BattleState, rng: Rng): Side[] {
 }
 
 /**
- * One monster's attack. `timing` is the player's tap: it boosts damage when the player attacks
+ * One monster's attack. `timing` is the player's tap: it raises or, on a miss, lowers damage when the player attacks
  * and blocks damage when the player is hit. Mutates the battle and returns what happened, in order.
  */
 export function resolveAttack(b: BattleState, from: Side, timing: TimingGrade, T: Tuning, rng: Rng): BattleEvent[] {
@@ -114,7 +114,7 @@ export function resolveAttack(b: BattleState, from: Side, timing: TimingGrade, T
   return ev;
 }
 
-const tapBonus = (t: TimingGrade, T: Tuning) => (t === "perfect" ? T.tapPerfectBonus : t === "good" ? T.tapGoodBonus : 0);
+const tapBonus = (t: TimingGrade, T: Tuning) => (t === "perfect" ? T.tapPerfectBonus : t === "good" ? T.tapGoodBonus : -T.tapMissPenalty);
 const blockShare = (t: TimingGrade, T: Tuning) => (t === "perfect" ? T.blockPerfect : t === "good" ? T.blockGood : 0);
 
 /** Call after both attacks. Ends the battle or moves to the next turn. */

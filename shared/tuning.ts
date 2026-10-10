@@ -1,7 +1,7 @@
 import type { Tuning } from "./types.js";
 
 export const DEFAULT_TUNING: Tuning = {
-  alwaysWin: true,
+  alwaysWin: false,
   dmgMult: 1,
   turnLimit: 6,
   kosToWin: 2,
@@ -13,6 +13,7 @@ export const DEFAULT_TUNING: Tuning = {
   ancestryMax: 3,
   tapPerfectBonus: 50,
   tapGoodBonus: 20,
+  tapMissPenalty: 30,
   blockPerfect: 50,
   blockGood: 25,
 };
