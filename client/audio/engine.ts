@@ -9,8 +9,9 @@ let master: GainNode, sfxBus: GainNode, musicBus: GainNode;
 let unlocked = false;
 const onUnlock: (() => void)[] = [];
 
-const SFX_LEVEL = 0.8;
-const MUSIC_LEVEL = 0.45;
+/** Bus gains at 100% on the settings sliders. */
+const SFX_FULL = 0.8;
+const MUSIC_FULL = 0.45;
 
 type AudioSessionNav = Navigator & { audioSession?: { type: string } };
 
@@ -24,12 +25,12 @@ export function initAudio() {
     if (!ctx) {
       ctx = new AudioContext();
       master = ctx.createGain();
-      master.gain.value = S.muted ? 0 : 1;
+      master.gain.value = S.muted ? 0 : S.audio.master;
       const limiter = ctx.createDynamicsCompressor();
       limiter.threshold.value = -6; limiter.ratio.value = 12;
       master.connect(limiter).connect(ctx.destination);
-      sfxBus = ctx.createGain(); sfxBus.gain.value = SFX_LEVEL; sfxBus.connect(master);
-      musicBus = ctx.createGain(); musicBus.gain.value = MUSIC_LEVEL; musicBus.connect(master);
+      sfxBus = ctx.createGain(); sfxBus.gain.value = SFX_FULL * S.audio.sfx; sfxBus.connect(master);
+      musicBus = ctx.createGain(); musicBus.gain.value = MUSIC_FULL * S.audio.music; musicBus.connect(master);
     }
     setSessionType();
     if (!("audioSession" in navigator)) playSilentLoop();
@@ -82,10 +83,19 @@ export function whenUnlocked(f: () => void) {
   if (unlocked) f(); else onUnlock.push(f);
 }
 
+/** Applies S.muted and S.audio to the running mix. */
+export function applyVolumes() {
+  if (!ctx) return;
+  const t = ctx.currentTime;
+  master.gain.setTargetAtTime(S.muted ? 0 : S.audio.master, t, 0.05);
+  sfxBus.gain.setTargetAtTime(SFX_FULL * S.audio.sfx, t, 0.05);
+  musicBus.gain.setTargetAtTime(MUSIC_FULL * S.audio.music, t, 0.05);
+}
+
 export function setMuted(m: boolean) {
   S.muted = m;
   save();
-  if (ctx) master.gain.setTargetAtTime(m ? 0 : 1, ctx.currentTime, 0.05);
+  applyVolumes();
   setSessionType();
   document.querySelectorAll<HTMLElement>("[data-mute]").forEach(updateMuteButton);
 }
