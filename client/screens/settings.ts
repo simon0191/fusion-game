@@ -1,4 +1,5 @@
-import { DEFAULT_AUDIO, S, save, type AudioSettings } from "../state/store.js";
+import { DEFAULT_AUDIO, S, save, type AudioSettings, type BattleMode } from "../state/store.js";
+import { MODE_NAMES } from "../battle/modes.js";
 import { closeScreen, openScreen } from "../router.js";
 import { applyVolumes, setMuted } from "../audio/engine.js";
 import { cry, sfx } from "../audio/sfx.js";
@@ -6,6 +7,7 @@ import { cry, sfx } from "../audio/sfx.js";
 type VolumeKey = { [K in keyof AudioSettings]: AudioSettings[K] extends number ? K : never }[keyof AudioSettings];
 const VOLUMES: [VolumeKey, string][] = [["master", "Master volume"], ["music", "Music"], ["sfx", "Sound effects"]];
 const pct = (v: number) => Math.round(v * 100) + "%";
+const MENU_MODES: BattleMode[] = ["classic", "tactics", "rush"];
 
 export function showSettings() {
   const o = openScreen(`<div class="screen">
@@ -21,6 +23,8 @@ export function showSettings() {
     <div class="panel">
       <h2 class="section-title">Battle</h2>
       <div class="seg" role="group" aria-label="Animation speed" style="font-size:13px">Animation speed ${[1, 2, 3].map(s => `<button type="button" data-speed="${s}" aria-pressed="${S.speed === s}">${s}×</button>`).join("")}</div>
+      <div class="seg" role="group" aria-label="Battle mode" style="font-size:13px">Battle mode ${MENU_MODES.map(m => `<button type="button" data-mode="${m}" aria-pressed="${S.battleMode === m}">${MODE_NAMES[m]}</button>`).join("")}</div>
+      <span class="hint">The battle mode applies from your next battle.</span>
       <label class="toggle"><input type="checkbox" data-set="alwaysWin" ${S.tuning.alwaysWin ? "checked" : ""}> Always win (for demos: enemies deal no damage, your hits knock out, all challengers unlocked)</label>
     </div>
   </div>`);
@@ -49,6 +53,9 @@ export function showSettings() {
     else if (t.dataset.speed) {
       S.speed = Number(t.dataset.speed); save();
       o.querySelectorAll<HTMLElement>("[data-speed]").forEach(x => x.setAttribute("aria-pressed", String(x === t)));
+    } else if (t.dataset.mode) {
+      S.battleMode = t.dataset.mode as BattleMode; save();
+      o.querySelectorAll<HTMLElement>("[data-mode]").forEach(x => x.setAttribute("aria-pressed", String(x === t)));
     } else if (t.dataset.defaults !== undefined) {
       S.audio = { ...DEFAULT_AUDIO }; save(); applyVolumes();
       showSettings();
