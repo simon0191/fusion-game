@@ -169,26 +169,10 @@ button.mchip.pickable { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 6
 .fuse-stage { position: relative; display: flex; justify-content: center; align-items: center; gap: 24px; min-height: 280px; width: 100%; }
 .fuse-stage .card { width: 150px; }
 .fuse-stage .plus { font: 400 40px/1 var(--display); color: var(--muted); }
-.fusing .card { animation: spin-in 1.7s cubic-bezier(.6,0,.4,1) forwards; }
-.fusing .card.a { --dx: 90px; } .fusing .card.b { --dx: -90px; }
-.fusing .plus { opacity: 0; }
-@keyframes spin-in { 60% { transform: translateX(var(--dx)) rotateY(540deg) scale(.8); filter: brightness(2); } 100% { transform: translateX(var(--dx)) rotateY(900deg) scale(.2); opacity: 0; filter: brightness(4); } }
-.glow { position: absolute; width: 60px; height: 60px; border-radius: 50%; background: radial-gradient(circle, #fff, var(--accent) 40%, transparent 70%); opacity: 0; pointer-events: none; }
-.fusing .glow { animation: burst 1.9s ease-in forwards; }
-@keyframes burst { 70% { opacity: .9; transform: scale(3); } 100% { opacity: 1; transform: scale(9); } }
-/* While the API draws: both parents melt into each other inside a spinning ring of their element colours. */
-.melt { position: absolute; width: 190px; height: 190px; display: grid; place-items: center; opacity: 0; pointer-events: none; animation: melt-in .5s 1.5s forwards; }
-.melt .ring { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, var(--ca), var(--cb), var(--ca), var(--cb), var(--ca)); -webkit-mask: radial-gradient(circle, transparent 58%, #000 60%, #000 66%, transparent 68%); mask: radial-gradient(circle, transparent 58%, #000 60%, #000 66%, transparent 68%); animation: spin 1.6s linear infinite; filter: blur(1px) drop-shadow(0 0 10px var(--ca)); }
-.melt .core { position: absolute; inset: 22%; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--ca) 40%, #fff), transparent 70%); animation: breathe 1.6s ease-in-out infinite; }
-.melt img { position: absolute; width: 62%; height: 62%; object-fit: contain; animation: swap 2.4s ease-in-out infinite; }
-.melt img.b { animation-delay: -1.2s; }
-.melt .spark { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: #fff; box-shadow: 0 0 8px 2px var(--cb); animation: spark 1.6s linear infinite; }
-.melt .spark:nth-of-type(2) { animation-delay: -.4s; box-shadow: 0 0 8px 2px var(--ca); } .melt .spark:nth-of-type(3) { animation-delay: -.8s; } .melt .spark:nth-of-type(4) { animation-delay: -1.2s; box-shadow: 0 0 8px 2px var(--ca); }
-@keyframes melt-in { to { opacity: 1; } }
-@keyframes spin { to { transform: rotate(360deg); } }
-@keyframes breathe { 50% { transform: scale(1.25); opacity: .6; } }
-@keyframes swap { 0%, 100% { opacity: 1; transform: scale(1) rotate(-4deg); filter: blur(0); } 45%, 55% { opacity: 0; transform: scale(.85) rotate(4deg); filter: blur(6px) brightness(1.6); } }
-@keyframes spark { from { transform: rotate(0deg) translateX(92px) scale(1); opacity: 1; } to { transform: rotate(360deg) translateX(40px) scale(.2); opacity: 0; } }
+.fusing .card { animation: unwind .6s .1s ease-in forwards; }
+.fusing .plus { opacity: 0; transition: opacity .3s; }
+@keyframes unwind { 40% { filter: brightness(1.5); } 100% { transform: scale(.85); opacity: .12; filter: brightness(1.8) saturate(.4); } }
+.helix { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .dots b { font-weight: 400; animation: blink 1.2s infinite; } .dots b:nth-child(2) { animation-delay: .2s; } .dots b:nth-child(3) { animation-delay: .4s; }
 @keyframes blink { 0%, 100% { opacity: .2; } 40% { opacity: 1; } }
 .flash { position: fixed; inset: 0; background: #fff; pointer-events: none; animation: flash .6s ease-out forwards; }
