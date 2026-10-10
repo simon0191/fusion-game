@@ -47,7 +47,7 @@ export function startHelix(stage: HTMLElement, a: Card, b: Card) {
   let t = still ? ZIPPED : 0, end = Infinity, done: (() => void) | null = null;
 
   const draw = () => {
-    const c = seg(t, end, end + COLLAPSE);
+    const c = t > end ? seg(t, end, end + COLLAPSE) : 0;
     const span = fullSpan * (1 - eio(c));
     const R = 38 * (1 - eio(c));
     const spin = still ? 0 : t * 3.2 + Math.pow(c * 3, 2) * 4;
