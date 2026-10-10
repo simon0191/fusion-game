@@ -8,13 +8,15 @@ Current state: placeholder art and world, mocked names, no AI calls.
 
 ```
 npm install
-npm run dev        # game on http://localhost:5173, API on :8787 (Vite proxies /api)
+npm run dev        # game on http://localhost:5180, API on :8787 (Vite proxies /api/)
 npm test           # rules tests
 npm run sim        # headless balance run, "Always win" off
 npm run typecheck
 ```
 
 Vite listens on your network too, so you can open the game on a phone on the same Wi-Fi.
+
+In dev builds the browser console has `__fusion.battle("vex")` to jump into a fight, plus `__fusion.state` and `__fusion.world()` for inspecting the game.
 
 ## Layout
 
