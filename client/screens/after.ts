@@ -77,7 +77,7 @@ async function doFuse(taken: Card, partner: Card) {
   </div>`);
   void sample("fusion");
   const res = fuse(taken, partner, S.tuning);
-  const [text, img] = await Promise.all([fusionText(taken, partner, res.outcome), fusionImage(res.child, taken, partner), new Promise(r => setTimeout(r, 2000))]);
+  const [text, img] = await Promise.all([fusionText(taken, partner, res.outcome), fusionImage(res.child), new Promise(r => setTimeout(r, 2000))]);
   const c = { ...res.child, name: text.name, flavor: text.flavor, ...(img ? { art: img.art } : {}) };
   S.stats[res.outcome]++;
   S.deck[S.deck.findIndex(x => x.id === partner.id)] = c;

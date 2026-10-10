@@ -1,6 +1,7 @@
 import type { Card, FusionOutcome } from "../shared/types.js";
 import { FusionText } from "../shared/fusion/schema.js";
 import { mockFusionText } from "../shared/fusion/mockText.js";
+import { MONSTERS } from "../shared/data/cards.js";
 
 /**
  * Asks the server for the fused monster's name and flavor text. Falls back to the local mock
@@ -57,15 +58,17 @@ async function small(src: string, cutWhite = false): Promise<string> {
   return cv.toDataURL("image/webp", 0.9);
 }
 
-/** Asks the server to draw the fused monster from both parents' pictures. Null when there is no key, no art or the call fails. */
-export async function fusionImage(child: Card, a: Card, b: Card): Promise<{ art: string; seconds: number; model: string } | null> {
-  if (!a.art || !b.art) return null;
+/** Asks the server to draw the fused monster from the base art of its ancestors (DNA). Null when there is no key or the call fails. */
+export async function fusionImage(child: Card): Promise<{ art: string; seconds: number; model: string } | null> {
+  if (!child.ancestry) return null;
+  const names = Object.keys(child.ancestry);
+  const artOf = (name: string) => Object.values(MONSTERS).find(m => m.name === name)?.art;
   try {
-    const [ia, ib] = await Promise.all([small(a.art), small(b.art)]);
+    const refs = await Promise.all(names.map(async name => ({ name, image: await small(artOf(name)!) })));
     const res = await fetch("/api/fuse-image", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ a: { name: a.name, image: ia }, b: { name: b.name, image: ib }, ancestry: child.ancestry ?? {}, els: child.els }),
+      body: JSON.stringify({ ancestry: child.ancestry, els: child.els, refs }),
       signal: AbortSignal.timeout(35000),
     });
     if (!res.ok) return null;
