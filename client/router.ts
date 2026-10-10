@@ -7,6 +7,7 @@ export const setWorld = (w: WorldHandle) => { world = w; };
 
 export function openScreen(html: string) {
   const o = $("#overlay")!;
+  o.className = "overlay";
   o.innerHTML = html;
   o.hidden = false;
   o.scrollTop = 0;

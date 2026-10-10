@@ -16,6 +16,8 @@ npm run typecheck
 
 Vite listens on your network too, so you can open the game on a phone on the same Wi-Fi.
 
+Controls: drag anywhere on the world for a thumb stick (WASD or arrows on desktop). The battle screen has a Layout A/B/C switch while we choose between three layouts: A Handheld, B Hand of cards, C Side rails.
+
 In dev builds the browser console has `__fusion.battle("vex")` to jump into a fight, plus `__fusion.state` and `__fusion.world()` for inspecting the game.
 
 ## Layout

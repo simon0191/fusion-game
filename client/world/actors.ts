@@ -1,4 +1,4 @@
-import { CapsuleGeometry, CircleGeometry, ConeGeometry, CylinderGeometry, Group, Mesh, MeshBasicMaterial, MeshLambertMaterial, RingGeometry, SphereGeometry } from "three";
+import { CapsuleGeometry, CircleGeometry, ConeGeometry, CylinderGeometry, Group, Mesh, MeshBasicMaterial, MeshLambertMaterial, SphereGeometry } from "three";
 
 /** Placeholder character: capsule body, two eyes facing +z, a soft shadow. */
 export function makeCharacter(color: string, hat = false): Group {
@@ -26,13 +26,6 @@ export function makeCharacter(color: string, hat = false): Group {
   }
   g.add(body);
   return g;
-}
-
-export function makeTapMarker(): Mesh {
-  const m = new Mesh(new RingGeometry(0.3, 0.45, 24), new MeshBasicMaterial({ color: "#ffffff", transparent: true, opacity: 0 }));
-  m.rotation.x = -Math.PI / 2;
-  m.position.y = 0.05;
-  return m;
 }
 
 export function makePlatform(): Mesh {

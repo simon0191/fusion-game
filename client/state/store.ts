@@ -3,6 +3,8 @@ import { STARTERS, makeCard } from "../../shared/data/cards.js";
 import { DEFAULT_TUNING } from "../../shared/tuning.js";
 
 export interface Stats { battles: number; wins: number; turns: number[]; crit: number; normal: number; botch: number; perfect: number; good: number; miss: number }
+export type BattleLayout = "a" | "b" | "c";
+
 export interface GameState {
   deck: Card[];
   party: string[];
@@ -11,6 +13,8 @@ export interface GameState {
   tuning: Tuning;
   /** Animation speed in battles. */
   speed: number;
+  /** Which battle screen layout is being trialled. */
+  battleLayout: BattleLayout;
 }
 
 const KEY = "fusion-game-v1";
@@ -20,7 +24,7 @@ const freshStats = (): Stats => ({ battles: 0, wins: 0, turns: [], crit: 0, norm
 
 export function freshGame(tuning: Tuning = { ...DEFAULT_TUNING }): GameState {
   const deck = STARTERS.map(t => makeCard(t));
-  return { deck, party: deck.slice(0, 3).map(c => c.id), beaten: [], stats: freshStats(), tuning, speed: 1 };
+  return { deck, party: deck.slice(0, 3).map(c => c.id), beaten: [], stats: freshStats(), tuning, speed: 1, battleLayout: "a" };
 }
 
 function load(): GameState {
@@ -41,7 +45,7 @@ export function save() {
 }
 
 export function resetGame() {
-  Object.assign(S, freshGame(S.tuning));
+  Object.assign(S, freshGame(S.tuning), { speed: S.speed, battleLayout: S.battleLayout });
   save();
 }
 

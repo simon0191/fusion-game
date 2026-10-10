@@ -1,17 +1,19 @@
 import type { Opponent, Side } from "../../shared/types.js";
-import { type BattleEvent, type BattleState, type Fighter, attackOrder, choosePick, createBattle, end, enemyPick, fighter, finishTurn, koCount, resolveAttack } from "../../shared/battle/engine.js";
+import { type BattleEvent, type BattleState, attackOrder, choosePick, createBattle, end, enemyPick, fighter, finishTurn, resolveAttack } from "../../shared/battle/engine.js";
 import { ELEMENTS } from "../../shared/data/elements.js";
 import { ABILITIES } from "../../shared/data/abilities.js";
 import { S, partyCards, save } from "../state/store.js";
 import { openScreen } from "../router.js";
 import { $, esc } from "../util.js";
-import { hpClass, miniHTML, miniStats, monsterSVG } from "./cards.js";
+import { hpClass, miniStats } from "./cards.js";
+import { battleHTML, plateInner, scoreHTML, teamHTML } from "./layouts.js";
 import { animAttack, enterFx, floatText, hitFx, koFx, setSpeed, setupFx, sleep } from "./fx.js";
 import { timingTap } from "./timing.js";
 import { showLost, showReward } from "../screens/after.js";
 
 let b: BattleState | null = null;
 let pickResolve: ((id: string) => void) | null = null;
+let picking = false;
 
 export function startBattle(opp: Opponent) {
   b = createBattle(partyCards(), opp);
@@ -96,42 +98,24 @@ function finish(battle: BattleState) {
 }
 
 /* ---------- Rendering ---------- */
-function scoreHTML(battle: BattleState) {
-  return `<span>Turn <b>${battle.turn}</b>/${S.tuning.turnLimit}</span><span>Your KOs <b>${koCount(battle.theirs)}</b>/${S.tuning.kosToWin}</span><span>Their KOs <b>${koCount(battle.mine)}</b>/${S.tuning.kosToWin}</span>`;
-}
-const plateInner = (f: Fighter) => `<div class="pn">${esc(f.name)}<span>${f.hp}/${f.maxHp}</span></div><div class="hpbar"><span class="${hpClass(f)}" style="width:${(f.hp / f.maxHp) * 100}%"></span></div>`;
-
 function render() {
   if (!b) return;
-  const mp = fighter(b, "mine"), tp = fighter(b, "theirs");
   const logHTML = $("#blog")?.innerHTML ?? "";
-  const o = openScreen(`<div class="battle">
-    <div class="bhud">
-      <div class="score" id="score">${scoreHTML(b)}</div>
-      <div class="speed" role="group" aria-label="Animation speed">Speed ${[1, 2, 3].map(s => `<button type="button" data-speed="${s}" aria-pressed="${S.speed === s}">${s}×</button>`).join("")}
-        <button type="button" class="win" data-winnow>Win now</button></div>
-    </div>
-    <div class="team"><h3>${esc(b.opp.name)}</h3>${b.theirs.map(f => miniHTML(f, "theirs", { active: tp?.id === f.id })).join("")}</div>
-    <div class="arena" id="arena">
-      ${tp ? `<div class="plate theirs">${plateInner(tp)}</div>` : ""}
-      ${mp ? `<div class="plate mine">${plateInner(mp)}</div>` : ""}
-      <div class="slot theirs">${tp ? `<div class="mon" id="monTheirs">${monsterSVG(tp.look)}</div>` : ""}</div>
-      <div class="slot mine">${mp ? `<div class="mon" id="monMine">${monsterSVG(mp.look)}</div>` : ""}</div>
-      <canvas id="fx"></canvas>
-    </div>
-    <div class="prompt" id="prompt"></div>
-    <div class="team mine"><h3>Your party</h3>${b.mine.map(f => miniHTML(f, "mine", { active: mp?.id === f.id })).join("")}</div>
-    <ol class="blog" id="blog">${logHTML}</ol>
-  </div>`);
+  const promptHTML = $("#prompt")?.innerHTML ?? "";
+  const liveRing = $(".tap");
+  const o = openScreen(battleHTML(b, S.battleLayout, picking, logHTML));
+  if (liveRing) $("#arena")!.appendChild(liveRing);
+  o.classList.add("battle-mode");
   o.onclick = onClick;
+  say(promptHTML);
   setupFx();
 }
 
 function markPickable(on: boolean) {
+  picking = on;
   if (!b) return;
   const team = $(".team.mine");
-  if (!team) return;
-  team.innerHTML = `<h3>Your party</h3>${b.mine.map(f => miniHTML(f, "mine", { pickable: on && f.hp > 0, active: b!.myPick === f.id })).join("")}`;
+  if (team) team.innerHTML = teamHTML(b, "mine", on);
 }
 
 function refresh() {
@@ -144,7 +128,8 @@ function refresh() {
       const el = $(`[data-mini="${side}-${x.id}"]`);
       if (!el) continue;
       el.classList.toggle("ko", x.hp <= 0);
-      el.querySelector(".ms")!.textContent = miniStats(x);
+      const ms = el.querySelector(".ms");
+      if (ms) ms.textContent = miniStats(x);
       const bar = el.querySelector<HTMLElement>(".hpbar span")!;
       bar.className = hpClass(x);
       bar.style.width = (x.hp / x.maxHp) * 100 + "%";
@@ -168,6 +153,9 @@ function onClick(e: MouseEvent) {
   } else if (d.speed) {
     S.speed = Number(d.speed); setSpeed(S.speed); save();
     document.querySelectorAll<HTMLElement>("[data-speed]").forEach(x => x.setAttribute("aria-pressed", String(Number(x.dataset.speed) === S.speed)));
+  } else if (d.layout) {
+    S.battleLayout = d.layout as typeof S.battleLayout; save();
+    render();
   } else if (d.winnow !== undefined && !b.over) {
     const battle = b;
     end(battle, true, "skipped");

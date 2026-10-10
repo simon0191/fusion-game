@@ -10,6 +10,7 @@ const LEAD_IN_MS = 300;
 /**
  * Shows the timing ring in the arena and resolves with the player's grade.
  * `attack`: a well-timed tap powers up the hit. `defend`: it blocks part of the damage.
+ * A tap anywhere on the battle screen counts, except on buttons.
  */
 export function timingTap(arena: HTMLElement, mode: "attack" | "defend", isCancelled: () => boolean): Promise<TimingGrade> {
   return new Promise(resolve => {
@@ -18,6 +19,7 @@ export function timingTap(arena: HTMLElement, mode: "attack" | "defend", isCance
     box.innerHTML = `<div class="label">${mode === "attack" ? "Tap to power up!" : "Tap to block!"}</div><div class="target"></div><div class="ring"></div>`;
     arena.appendChild(box);
     const ring = box.querySelector<HTMLElement>(".ring")!;
+    const surface = arena.closest<HTMLElement>("#overlay") ?? arena;
     const start = performance.now() + LEAD_IN_MS;
     const hitAt = start + CLOSE_MS;
     let done = false;
@@ -25,7 +27,7 @@ export function timingTap(arena: HTMLElement, mode: "attack" | "defend", isCance
     const finish = (grade: TimingGrade) => {
       if (done) return;
       done = true;
-      arena.removeEventListener("pointerdown", onTap);
+      surface.removeEventListener("pointerdown", onTap);
       removeEventListener("keydown", onKey);
       ring.remove();
       const g = document.createElement("div");
@@ -35,6 +37,7 @@ export function timingTap(arena: HTMLElement, mode: "attack" | "defend", isCance
       setTimeout(() => { box.remove(); resolve(grade); }, 420);
     };
     const onTap = (e: Event) => {
+      if (e instanceof PointerEvent && (e.target as HTMLElement).closest("button")) return;
       e.preventDefault();
       const now = performance.now();
       if (now < start) return;
@@ -42,12 +45,12 @@ export function timingTap(arena: HTMLElement, mode: "attack" | "defend", isCance
       finish(dt <= PERFECT_MS ? "perfect" : dt <= GOOD_MS ? "good" : "miss");
     };
     const onKey = (e: KeyboardEvent) => { if (e.code === "Space" || e.code === "Enter") onTap(e); };
-    arena.addEventListener("pointerdown", onTap);
+    surface.addEventListener("pointerdown", onTap);
     addEventListener("keydown", onKey);
 
     const step = (now: number) => {
       if (done) return;
-      if (isCancelled()) { done = true; box.remove(); arena.removeEventListener("pointerdown", onTap); removeEventListener("keydown", onKey); resolve("miss"); return; }
+      if (isCancelled()) { done = true; box.remove(); surface.removeEventListener("pointerdown", onTap); removeEventListener("keydown", onKey); resolve("miss"); return; }
       const t = Math.max(0, now - start) / CLOSE_MS;
       ring.style.transform = `scale(${Math.max(0.5, 3.2 - 2.2 * t)})`;
       ring.style.opacity = String(Math.min(1, 0.3 + t));
