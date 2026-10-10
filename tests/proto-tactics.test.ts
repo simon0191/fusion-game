@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { STARTERS, OPPONENTS, makeCard } from "../shared/data/cards.js";
+import { MONSTERS, OPPONENTS, makeCard } from "../shared/data/cards.js";
 import { SKILL } from "../shared/battle/bot.js";
 import {
   TACTICS, type Action, type TacticsState, active, beginTurn, bench, canUse, createTactics, endTurn, enemyChoose,
@@ -10,7 +10,7 @@ import { mulberry32 } from "../shared/rng.js";
 import type { AbilityType } from "../shared/types.js";
 
 const T = { ...DEFAULT_TUNING, alwaysWin: false };
-const party = () => STARTERS.slice(0, 3).map(t => makeCard(t));
+const party = () => ["gryffup", "rimescale", "lanternip"].map(k => makeCard(MONSTERS[k]));
 
 /** One full turn with fixed choices and taps. */
 function play(b: TacticsState, mine: Action, theirs: Action, seed = 1, tuning = T) {
@@ -25,7 +25,7 @@ function play(b: TacticsState, mine: Action, theirs: Action, seed = 1, tuning = 
 function withAbility(type: AbilityType, v = 3) {
   const p = party();
   p[0].ab = { type, v };
-  return createTactics(p, OPPONENTS[0]);
+  return createTactics(p, OPPONENTS[0], mulberry32(1));
 }
 
 describe("tactics battle flow", () => {
@@ -44,7 +44,7 @@ describe("tactics battle flow", () => {
       expect(b.result).toBe("win");
       expect(b.mine.every(f => f.hp === f.maxHp)).toBe(true);
     }
-    const b = createTactics(party(), OPPONENTS[4]);
+    const b = createTactics(party(), OPPONENTS[4], mulberry32(1));
     play(b, { kind: "strike" }, { kind: "guard" }, 2, AW);
     expect(b.theirs[0].hp).toBe(0);
   });
@@ -52,7 +52,7 @@ describe("tactics battle flow", () => {
 
 describe("energy", () => {
   it("starts at 1, a special needs 3 and costs 3", () => {
-    const b = createTactics(party(), OPPONENTS[0]);
+    const b = createTactics(party(), OPPONENTS[0], mulberry32(1));
     expect(active(b, "mine").energy).toBe(1);
     expect(canUse(b, "mine", "special")).toBe(false);
     expect(() => beginTurn(b, { kind: "special" }, { kind: "guard" })).toThrow();
@@ -62,7 +62,7 @@ describe("energy", () => {
   });
 
   it("strike gives 1, guard gives 2, and it caps at 5", () => {
-    const b = createTactics(party(), OPPONENTS[0]);
+    const b = createTactics(party(), OPPONENTS[0], mulberry32(1));
     active(b, "mine").maxHp = active(b, "mine").hp = 999;
     play(b, { kind: "strike" }, { kind: "guard" });
     expect(active(b, "mine").energy).toBe(2);
@@ -75,7 +75,7 @@ describe("energy", () => {
 
 describe("swap and order", () => {
   it("a swapped-in monster takes the incoming hit", () => {
-    const b = createTactics(party(), OPPONENTS[0]);
+    const b = createTactics(party(), OPPONENTS[0], mulberry32(1));
     const lead = active(b, "mine"), sub = bench(b, "mine")[0];
     const ev = play(b, { kind: "swap", to: sub.id }, { kind: "strike" });
     expect(ev[0]).toMatchObject({ kind: "swap", side: "mine" });
@@ -85,7 +85,7 @@ describe("swap and order", () => {
   });
 
   it("guards resolve before attacks, even against a faster attacker", () => {
-    const b = createTactics(party(), OPPONENTS[0]);
+    const b = createTactics(party(), OPPONENTS[0], mulberry32(1));
     const ev = play(b, { kind: "guard" }, { kind: "strike" });
     expect(ev.findIndex(e => e.kind === "guard")).toBeLessThan(ev.findIndex(e => e.kind === "hit"));
     expect(ev.find(e => e.kind === "hit" && e.to === "mine")).toMatchObject({ blocked: "guard" });
@@ -94,6 +94,7 @@ describe("swap and order", () => {
   it("quick goes first, and Blitz goes before Quick", () => {
     const b = withAbility("quick");
     active(b, "mine").spd = 1;
+    active(b, "theirs").ab = { type: "burn", v: 0 };
     b.acts = { mine: { kind: "strike" }, theirs: { kind: "strike" } };
     expect(turnOrder(b, mulberry32(1))[0]).toBe("mine");
     active(b, "theirs").ab = { type: "quick", v: 0 };
@@ -145,7 +146,7 @@ describe("specials", () => {
 describe("enemy intent", () => {
   it("never claims a move the enemy cannot make", () => {
     for (let i = 0; i < 200; i++) {
-      const b = createTactics(party(), OPPONENTS[i % OPPONENTS.length]);
+      const b = createTactics(party(), OPPONENTS[i % OPPONENTS.length], mulberry32(1));
       const intent = enemyChoose(b, mulberry32(i));
       expect(canUse(b, "theirs", intent.hint)).toBe(true);
       expect(canUse(b, "theirs", intent.action.kind)).toBe(true);

@@ -26,7 +26,7 @@
  * returns what happened. The browser drives it from requestAnimationFrame; the simulator runs it at a fixed dt.
  */
 import type { AbilityType, Card, Opponent, Rng, Side, Tuning } from "../../types.js";
-import { POOL, makeCard } from "../../data/cards.js";
+import { TEAM_SIZE, randomMonsters } from "../../data/cards.js";
 import { elementMultiplier } from "../../data/elements.js";
 import { between } from "../../rng.js";
 import { type Fighter, hpShare, koCount } from "../engine.js";
@@ -116,12 +116,12 @@ const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
 
 const newSide = (team: Fighter[]): RushSide => ({ team, active: 0, bar: 0, special: 0, swapCd: 0, burnMs: 0, burnTickMs: 0, burnDmg: 0, shieldMs: 0, thornsMs: 0 });
 
-export function createRush(party: Card[], opp: Opponent): RushState {
+export function createRush(party: Card[], opp: Opponent, rng: Rng = Math.random): RushState {
   return {
     opp,
     t: 0,
     mine: newSide(party.map(toFighter)),
-    theirs: newSide(opp.cards.map(k => toFighter(makeCard(POOL[k], opp.mult)))),
+    theirs: newSide(randomMonsters(TEAM_SIZE, rng, opp.mult).map(toFighter)),
     holding: false,
     chargeMs: 0,
     wind: null,
@@ -329,7 +329,7 @@ function hit(s: RushState, from: Side, power: number, o: HitOpts, T: Tuning, rng
   }
   const drain = o.drain ?? (o.passive && a.ab.type === "drain" ? 0.5 : 0);
   if (!selfHit && drain && dmg > 0 && a.hp > 0) heal(a, from, Math.round(dmg * drain), ev);
-  if (!selfHit && a.hp > 0 && !(T.alwaysWin && from === "theirs")) {
+  if (!selfHit && a.hp > 0 && !(T.alwaysWin && from === "mine")) {
     let th = 0;
     if (target.ab.type === "thorns") th += Math.max(1, Math.round(target.ab.v * RUSH.dmgScale));
     if (tx.thornsMs > 0) th += Math.round(dmg * RUSH.thornsShare);
@@ -491,7 +491,7 @@ export function botInput(s: RushState, m: RushBot, k: RushSkill, rng: Rng): Rush
 }
 
 export function simulateRush(party: Card[], opp: Opponent, T: Tuning, skill: RushSkill, rng: Rng, dt = 20): RushState {
-  const s = createRush(party, opp);
+  const s = createRush(party, opp, rng);
   const bot = newRushBot();
   for (let guard = 0; !s.over && guard < 1e6; guard++) step(s, dt, botInput(s, bot, skill, rng), T, rng);
   return s;

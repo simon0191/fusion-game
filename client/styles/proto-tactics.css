@@ -3,7 +3,7 @@
 
 .p-tactics .tt-team { flex: none; display: flex; gap: 6px; min-width: 0; }
 .p-tactics .tt-chip { flex: 1 1 0; grid-template-columns: 28px minmax(0, 1fr); grid-template-rows: auto auto auto; column-gap: 5px; row-gap: 2px; align-items: center; padding: 3px 5px; border-width: 2px; }
-.p-tactics .tt-chip svg { grid-row: 1 / 4; width: 28px; }
+.p-tactics .tt-chip :is(svg, .pic) { grid-row: 1 / 4; width: 28px; }
 .p-tactics .tt-chip .mn { font-size: 11px; }
 .p-tactics .tt-chip.active { outline-width: 2px; }
 .p-tactics button.tt-chip { min-height: 44px; }

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { OPPONENTS, STARTERS, makeCard } from "../shared/data/cards.js";
+import { MONSTERS, OPPONENTS, makeCard } from "../shared/data/cards.js";
+import { elementMultiplier } from "../shared/data/elements.js";
 import {
   type ActionCard, type HandState, ENERGY, HAND_SIZE, HAND_SKILLS, TURN_LIMIT,
   beginEnemyPhase, cannotPlay, createHand, enemyAct, endTurn, finishEnemyPhase, playCard, simulateHand, validTargets,
@@ -8,7 +9,7 @@ import { DEFAULT_TUNING } from "../shared/tuning.js";
 import { mulberry32 } from "../shared/rng.js";
 
 const T = { ...DEFAULT_TUNING, alwaysWin: false };
-const party = () => STARTERS.slice(0, 3).map(t => makeCard(t));
+const party = () => ["gryffup", "rimescale", "lanternip"].map(k => makeCard(MONSTERS[k]));
 const fresh = (seed = 1, opp = OPPONENTS[0], tuning = T) => createHand(party(), opp, tuning, mulberry32(seed));
 /** Puts a specific card into the hand so a test does not depend on the shuffle. */
 function give(s: HandState, pred: (c: ActionCard) => boolean) {
@@ -109,7 +110,7 @@ describe("hand battles", () => {
     const ev = enemyAct(s, e.id, T, mulberry32(1));
     const hit = ev.find(x => x.kind === "hit")!;
     expect(hit.kind === "hit" && hit.blocked).toBe(block);
-    expect(hp - ally.hp).toBe(Math.round((block + 5) * (e.els[0] === "fire" ? 1.5 : 1)) - block);
+    expect(hp - ally.hp).toBe(Math.round((block + 5) * elementMultiplier(e.els, ally.els)) - block);
     ally.block = 3;
     for (const x of s.theirs.slice(1)) enemyAct(s, x.id, T, mulberry32(1));
     finishEnemyPhase(s, T, mulberry32(2));

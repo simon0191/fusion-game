@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { OPPONENTS, STARTERS, makeCard } from "../shared/data/cards.js";
+import { MONSTERS, OPPONENTS, makeCard } from "../shared/data/cards.js";
 import { RUSH, RUSH_SKILL, active, createRush, simulateRush, step, type RushState } from "../shared/battle/protos/rush.js";
 import { DEFAULT_TUNING } from "../shared/tuning.js";
 import { mulberry32 } from "../shared/rng.js";
 
 const T = { ...DEFAULT_TUNING, alwaysWin: false };
-const party = () => STARTERS.slice(0, 3).map(t => makeCard(t));
+const party = () => ["gryffup", "rimescale", "lanternip"].map(k => makeCard(MONSTERS[k]));
 /** Mossback with no ability, so passives do not blur the numbers. */
-const plain = () => [makeCard({ ...STARTERS[2], ab: ["burn", 0] }), ...party().slice(1)];
+const plain = () => [makeCard({ ...MONSTERS.lanternip, ab: ["burn", 0] }), ...party().slice(1)];
 
 /** Runs the clock with no input until `until` holds. */
 function runUntil(s: RushState, until: (s: RushState) => boolean, rng = mulberry32(1), dt = 10) {
@@ -35,7 +35,7 @@ describe("rush battles", () => {
   });
 
   it("a perfect block takes no damage and counters", () => {
-    const s = createRush(plain(), OPPONENTS[0]);
+    const s = createRush(plain(), OPPONENTS[0], mulberry32(1));
     runUntil(s, x => !!x.wind && x.wind.ms >= RUSH.windMs - 60);
     const me = active(s.mine), foe = active(s.theirs), foeHp = foe.hp;
     const ev = step(s, 10, { block: true }, T, mulberry32(2));
@@ -47,7 +47,7 @@ describe("rush battles", () => {
 
   it("an early block halves the damage", () => {
     const dmg = (blockEarly: boolean, seed: number) => {
-      const s = createRush(plain(), OPPONENTS[0]);
+      const s = createRush(plain(), OPPONENTS[0], mulberry32(1));
       runUntil(s, x => !!x.wind);
       if (blockEarly) step(s, 10, { block: true }, T, mulberry32(seed));
       const me = active(s.mine);
@@ -61,7 +61,7 @@ describe("rush battles", () => {
   });
 
   it("a whiffed block locks Block for a moment", () => {
-    const s = createRush(plain(), OPPONENTS[0]);
+    const s = createRush(plain(), OPPONENTS[0], mulberry32(1));
     expect(step(s, 10, { block: true }, T, mulberry32(1))).toContainEqual({ kind: "block", grade: "whiff" });
     expect(step(s, 10, { block: true }, T, mulberry32(1))).not.toContainEqual(expect.objectContaining({ kind: "block" }));
   });
@@ -71,7 +71,7 @@ describe("rush battles", () => {
       let total = 0;
       for (let i = 0; i < 100; i++) {
         const rng = mulberry32(i);
-        const s = createRush(plain(), OPPONENTS[0]);
+        const s = createRush(plain(), OPPONENTS[0], mulberry32(1));
         s.mine.bar = 1;
         step(s, 0, { down: true }, T, rng);
         for (let t = 0; t < chargeMs; t += 10) step(s, 10, {}, T, rng);
@@ -87,7 +87,7 @@ describe("rush battles", () => {
   });
 
   it("getting hit cancels a charge", () => {
-    const s = createRush(plain(), OPPONENTS[0]);
+    const s = createRush(plain(), OPPONENTS[0], mulberry32(1));
     runUntil(s, x => x.mine.bar >= 1 && !!x.wind);
     step(s, 10, { down: true }, T, mulberry32(1));
     runUntil(s, x => !x.wind);
@@ -96,7 +96,7 @@ describe("rush battles", () => {
   });
 
   it("enforces the swap cooldown", () => {
-    const s = createRush(party(), OPPONENTS[0]);
+    const s = createRush(party(), OPPONENTS[0], mulberry32(1));
     step(s, 10, { swap: 1 }, T, mulberry32(1));
     expect(s.mine.active).toBe(1);
     expect(s.mine.bar).toBeLessThan(0.01);
@@ -110,7 +110,7 @@ describe("rush battles", () => {
   });
 
   it("pauses the clock while the player picks a replacement", () => {
-    const s = createRush(party(), OPPONENTS[4]);
+    const s = createRush(party(), OPPONENTS[4], mulberry32(1));
     runUntil(s, x => x.needPick);
     expect(s.needPick).toBe(true);
     const t = s.t;

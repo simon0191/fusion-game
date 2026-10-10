@@ -6,9 +6,9 @@
 .p-rush .r-foes { flex: none; display: flex; align-items: center; gap: 6px; min-height: 30px; }
 .p-rush .r-foes .oppname { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .p-rush .r-foe { --el: #888; width: 34px; display: grid; gap: 2px; }
-.p-rush .r-foe svg { width: 34px; height: 26px; display: block; border-radius: 6px; border: 2px solid var(--el); background: color-mix(in srgb, var(--el) 25%, var(--panel)); }
+.p-rush .r-foe :is(svg, .pic) { width: 34px; height: 26px; display: block; border-radius: 6px; border: 2px solid var(--el); background: color-mix(in srgb, var(--el) 25%, var(--panel)); }
 .p-rush .r-foe .hpbar { height: 4px; }
-.p-rush .r-foe.active svg { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+.p-rush .r-foe.active :is(svg, .pic) { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
 .p-rush .r-foe.ko { filter: grayscale(1); opacity: .4; }
 
 /* Arena */
@@ -57,7 +57,7 @@
 /* Your bench: tap to swap */
 .p-rush .r-bench { flex: none; }
 .p-rush .r-chip { flex: 1; min-height: 50px; grid-template-columns: 34px minmax(0, 1fr); grid-template-rows: 1fr auto; column-gap: 6px; align-items: center; overflow: hidden; touch-action: manipulation; }
-.p-rush .r-chip svg { grid-row: 1 / 3; }
+.p-rush .r-chip :is(svg, .pic) { grid-row: 1 / 3; }
 .p-rush .r-chip .mn { white-space: normal; overflow-wrap: anywhere; }
 .p-rush .r-chip .r-key { position: absolute; top: 2px; right: 4px; font: 600 10px var(--num); color: var(--card-muted); }
 .p-rush .r-chip .r-cd { position: absolute; inset: 0; pointer-events: none; background: conic-gradient(rgba(14,27,34,.55) calc(var(--cd, 0) * 360deg), transparent 0); }

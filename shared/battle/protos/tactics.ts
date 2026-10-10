@@ -24,7 +24,7 @@
  *   blocks part of the damage (or powers your counter while you guard or Bulwark is up).
  */
 import type { AbilityType, Card, Opponent, Rng, Side, TimingGrade, Tuning } from "../../types.js";
-import { POOL, makeCard } from "../../data/cards.js";
+import { TEAM_SIZE, randomMonsters } from "../../data/cards.js";
 import { elementMultiplier } from "../../data/elements.js";
 import { between } from "../../rng.js";
 import type { Fighter } from "../engine.js";
@@ -98,8 +98,8 @@ export const other = (s: Side): Side => (s === "mine" ? "theirs" : "mine");
 const toT = (c: Card): TFighter => ({ ...c, els: [...c.els], ab: { ...c.ab }, look: { ...c.look }, hp: c.maxHp, energy: TACTICS.energyStart, burnTurns: 0, burnDmg: 0, reflect: false });
 const firstAlive = (list: TFighter[]) => list.find(f => f.hp > 0)?.id ?? list[0].id;
 
-export function createTactics(party: Card[], opp: Opponent): TacticsState {
-  const mine = party.map(toT), theirs = opp.cards.map(k => toT(makeCard(POOL[k], opp.mult)));
+export function createTactics(party: Card[], opp: Opponent, rng: Rng = Math.random): TacticsState {
+  const mine = party.map(toT), theirs = randomMonsters(TEAM_SIZE, rng, opp.mult).map(toT);
   return {
     opp, mine, theirs,
     active: { mine: firstAlive(mine), theirs: firstAlive(theirs) },
@@ -401,7 +401,7 @@ export function botChoose(b: TacticsState, hint: ActionKind, rng: Rng): Action {
 }
 
 export function simulateTactics(party: Card[], opp: Opponent, T: Tuning, skill: TapSkill = SKILL.casual, rng: Rng = Math.random): TacticsState {
-  const b = createTactics(party, opp);
+  const b = createTactics(party, opp, rng);
   while (!b.over) {
     if (needsReplacement(b, "theirs")) sendIn(b, "theirs", bestReplacement(b, "theirs", rng, 4));
     if (needsReplacement(b, "mine")) sendIn(b, "mine", bestReplacement(b, "mine", rng));

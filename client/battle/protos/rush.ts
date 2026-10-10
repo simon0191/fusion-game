@@ -8,7 +8,7 @@ import { ABILITIES } from "../../../shared/data/abilities.js";
 import { S, partyCards, type BattleMode } from "../../state/store.js";
 import { openScreen } from "../../router.js";
 import { $, esc } from "../../util.js";
-import { hpClass, monsterSVG } from "../cards.js";
+import { hpClass, monsterArt } from "../cards.js";
 import { animAttack, enterFx, floatText, hitFx, koFx, setSpeed, setupFx } from "../fx.js";
 import { type BattleMechanic, finishBattle, modeBarHTML, switchMode } from "../modes.js";
 
@@ -76,7 +76,7 @@ function finish(r: Run) {
   const { opp, result } = r.s;
   const secs = seconds(r.s);
   stop();
-  finishBattle(opp, result === "win", secs);
+  finishBattle(opp, result === "win", secs, r.s.theirs.team);
 }
 
 /* ---------- Loop ---------- */
@@ -175,16 +175,16 @@ const plateHTML = (f: Fighter, side: Side) => `
   <div class="r-tags" data-tags="${side}"></div>`;
 
 const slotHTML = (f: Fighter, side: Side) =>
-  `<div class="mon" id="${side === "mine" ? "monMine" : "monTheirs"}">${monsterSVG(f.look)}</div>${side === "theirs" ? `<div class="r-wind"></div>` : `<div class="r-charge"></div>`}`;
+  `<div class="mon" id="${side === "mine" ? "monMine" : "monTheirs"}">${monsterArt(f)}</div>${side === "theirs" ? `<div class="r-wind"></div>` : `<div class="r-charge"></div>`}`;
 
 const benchHTML = (s: RushState) => s.mine.team.map((f, i) => `
   <button type="button" class="mchip r-chip" data-swap="${i}" style="--el:${ELEMENTS[f.els[0]].color}" aria-label="Swap to ${esc(f.name)}">
-    ${monsterSVG(f.look)}<span class="mn">${esc(f.name)}</span><span class="r-key">${i + 1}</span>
+    ${monsterArt(f)}<span class="mn">${esc(f.name)}</span><span class="r-key">${i + 1}</span>
     <span class="hpbar"><span style="width:${(f.hp / f.maxHp) * 100}%"></span></span><span class="r-cd"></span>
   </button>`).join("");
 
 const foesHTML = (s: RushState) => s.theirs.team.map(f => `
-  <div class="r-foe" style="--el:${ELEMENTS[f.els[0]].color}" title="${esc(f.name)}">${monsterSVG(f.look)}<span class="hpbar"><span style="width:100%"></span></span></div>`).join("");
+  <div class="r-foe" style="--el:${ELEMENTS[f.els[0]].color}" title="${esc(f.name)}">${monsterArt(f)}<span class="hpbar"><span style="width:100%"></span></span></div>`).join("");
 
 function screenHTML(s: RushState) {
   const T = S.tuning;
@@ -437,7 +437,7 @@ function onClick(e: MouseEvent) {
   else if (d.winnow !== undefined && !r.s.over) {
     const { opp } = r.s, secs = seconds(r.s);
     stop();
-    finishBattle(opp, true, secs, true);
+    finishBattle(opp, true, secs, r.s.theirs.team, true);
   } else if (d.swap !== undefined) choose(r, Number(d.swap));
   else if (d.act && e.detail === 0) act(r, d.act);
 }

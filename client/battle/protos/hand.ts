@@ -10,7 +10,7 @@ import { ABILITIES } from "../../../shared/data/abilities.js";
 import { S, partyCards, save, type BattleMode } from "../../state/store.js";
 import { openScreen } from "../../router.js";
 import { $, esc } from "../../util.js";
-import { hpClass, monsterSVG } from "../cards.js";
+import { hpClass, monsterArt } from "../cards.js";
 import { setSpeed } from "../fx.js";
 import { type BattleMechanic, finishBattle, modeBarHTML, switchMode } from "../modes.js";
 
@@ -104,7 +104,7 @@ function fighterHTML(r: Run, f: HFighter, mine: boolean) {
     ${intent}
     <button type="button" class="ph-body" style="--el:${elColor(f)}" data-target="${f.id}" ${targetable ? "" : `aria-disabled="true"`} aria-label="${esc(f.name)}, ${f.hp} of ${f.maxHp} HP">
       ${hint}
-      <span class="ph-art">${monsterSVG(f.look)}</span>
+      <span class="ph-art">${monsterArt(f)}</span>
       <span class="ph-name">${esc(f.name)}</span>
       <span class="hpbar"><span class="${hpClass(f)}" style="width:${(f.hp / f.maxHp) * 100}%"></span></span>
       <span class="ph-hp">${f.hp}/${f.maxHp}</span>
@@ -120,7 +120,7 @@ function cardHTML(r: Run, c: ActionCard, i: number, n: number) {
   const label = c.fainted ? `Fainted card of ${o.name}` : `${cardName(c)}, cost ${c.cost}, ${o.name}. ${cardText(s, c, null, T())}`;
   return `<button type="button" class="ph-card${c.fainted ? " fainted" : ""}${why ? " off" : ""}${r.selected === c ? " sel" : ""} k-${c.kind}" style="--el:${elColor(o)};--r:${off * 4}deg;--y:${Math.abs(off) * 5}px" data-card="${c.uid}" aria-label="${esc(label)}" aria-pressed="${r.selected === c}">
     <span class="cost">${c.fainted ? "–" : c.cost}</span>
-    <span class="face">${monsterSVG(o.look)}</span>
+    <span class="face">${monsterArt(o)}</span>
     <span class="cn">${esc(cardName(c))}</span>
     <span class="cv">${esc(cardShort(s, c, null, T()))}</span>
     <span class="who">${esc(o.name)}</span>
@@ -261,7 +261,7 @@ async function finish(r: Run) {
   log(r, r.s.endReason === "knockouts" ? (r.s.result === "win" ? "You win!" : "You lose.") : `${r.s.result === "win" ? "You win" : "You lose"}: ${esc(r.s.endReason)}.`);
   await wait(r, 1100);
   if (!r.alive || run !== r) return;
-  finishBattle(r.s.opp, r.s.result === "win", r.s.turn);
+  finishBattle(r.s.opp, r.s.result === "win", r.s.turn, r.s.theirs);
 }
 
 /* ---------- Input ---------- */
@@ -278,7 +278,7 @@ function onClick(ev: MouseEvent) {
     document.querySelectorAll<HTMLElement>(".p-hand [data-speed]").forEach(x => x.setAttribute("aria-pressed", String(Number(x.dataset.speed) === S.speed)));
     return;
   }
-  if (d.winnow !== undefined) return finishBattle(s.opp, true, s.turn, true);
+  if (d.winnow !== undefined) return finishBattle(s.opp, true, s.turn, s.theirs, true);
   if (s.phase !== "player" || r.busy) return;
   if (d.card) {
     const c = s.hand.find(x => String(x.uid) === d.card);

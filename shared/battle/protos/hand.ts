@@ -22,7 +22,7 @@
  *   damaging card knock out its target.
  */
 import type { AbilityType, Card, Opponent, Rng, Tuning } from "../../types.js";
-import { POOL, makeCard } from "../../data/cards.js";
+import { TEAM_SIZE, randomMonsters } from "../../data/cards.js";
 import { elementMultiplier } from "../../data/elements.js";
 import { between } from "../../rng.js";
 
@@ -130,7 +130,7 @@ export function createHand(party: Card[], opp: Opponent, T: Tuning, rng: Rng): H
   }
   const s: HandState = {
     opp, mine,
-    theirs: opp.cards.map(k => toFighter(makeCard(POOL[k], opp.mult), HP_MULT * opp.mult ** -ENEMY_HP_DAMP)),
+    theirs: randomMonsters(TEAM_SIZE, rng, opp.mult).map(c => toFighter(c, HP_MULT * opp.mult ** -ENEMY_HP_DAMP)),
     draw: shuffle(deck, rng), hand: [], discard: [],
     energy: 0, turn: 0, phase: "player", result: null, endReason: "", reshuffles: 0,
   };

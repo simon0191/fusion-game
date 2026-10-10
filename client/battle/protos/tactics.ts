@@ -9,8 +9,8 @@ import { ELEMENTS } from "../../../shared/data/elements.js";
 import { S, partyCards, save, type BattleMode } from "../../state/store.js";
 import { openScreen } from "../../router.js";
 import { $, esc } from "../../util.js";
-import { hpClass, monsterSVG } from "../cards.js";
-import { plateInner } from "../layouts.js";
+import { hpClass, monsterArt } from "../cards.js";
+import { plateInner } from "../markup.js";
 import { animAttack, enterFx, floatText, hitFx, koFx, setSpeed, setupFx, speed } from "../fx.js";
 import { timingTap } from "../timing.js";
 import { type BattleMechanic, finishBattle, modeBarHTML, switchMode } from "../modes.js";
@@ -149,7 +149,7 @@ async function loop(r: Run) {
   say(b.result === "win" ? `You win! (${b.endReason})` : `${esc(b.opp.name)} wins. (${b.endReason})`);
   await wait(r, 900);
   if (r.dead) return;
-  finishBattle(b.opp, b.result === "win", b.turn);
+  finishBattle(b.opp, b.result === "win", b.turn, b.theirs);
 }
 
 function actionWords(b: TacticsState, side: Side, a: Action) {
@@ -243,7 +243,7 @@ function onClick(r: Run, e: MouseEvent) {
     S.speed = Number(d.speed); setSpeed(S.speed); save();
     document.querySelectorAll<HTMLElement>(".p-tactics [data-speed]").forEach(x => x.setAttribute("aria-pressed", String(Number(x.dataset.speed) === S.speed)));
   } else if (d.mode) switchMode(d.mode as BattleMode, b.opp);
-  else if (d.winnow !== undefined && !b.over) finishBattle(b.opp, true, b.turn, true);
+  else if (d.winnow !== undefined && !b.over) finishBattle(b.opp, true, b.turn, b.theirs, true);
 }
 
 function chooseAct(r: Run, kind: ActionKind) {
@@ -318,7 +318,7 @@ function plateHTML(b: TacticsState, side: Side) {
 
 const monHTML = (b: TacticsState, side: Side) => {
   const f = active(b, side);
-  return f.hp > 0 ? `<div class="mon" id="${side === "mine" ? "monMine" : "monTheirs"}">${monsterSVG(f.look)}</div>` : "";
+  return f.hp > 0 ? `<div class="mon" id="${side === "mine" ? "monMine" : "monTheirs"}">${monsterArt(f)}</div>` : "";
 };
 
 function teamHTML(b: TacticsState, side: Side, pickable: boolean) {
@@ -328,7 +328,7 @@ function teamHTML(b: TacticsState, side: Side, pickable: boolean) {
     const cls = `mchip tt-chip${f.hp <= 0 ? " ko" : ""}${f.id === b.active[side] ? " active" : ""}${can ? " pickable" : ""}`;
     const attrs = can ? `type="button" data-pick="${f.id}" aria-label="Send in ${esc(f.name)}"` : "";
     return `<${tag} class="${cls}" style="--el:${ELEMENTS[f.els[0]].color}" ${attrs}>
-      ${monsterSVG(f.look)}
+      ${monsterArt(f)}
       <span class="mn">${esc(f.name)}</span>
       <span class="tt-hp"><span class="hpbar"><span class="${hpClass(f)}" style="width:${(f.hp / f.maxHp) * 100}%"></span></span><span class="tt-num">${f.hp}</span></span>
       ${pipsHTML(f)}

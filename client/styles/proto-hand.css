@@ -9,8 +9,8 @@
 .p-hand .mine .ph-f { align-content: start; }
 .p-hand .ph-body { --el: #888; position: relative; width: 100%; min-height: 44px; background: var(--card); color: var(--card-ink); border: 3px solid var(--el); border-radius: 10px; padding: 3px 4px 4px; display: grid; gap: 2px; justify-items: center; text-align: center; cursor: default; }
 .p-hand .ph-art { display: block; width: var(--art); height: var(--art); }
-.p-hand .ph-art svg { width: 100%; height: 100%; display: block; }
-.p-hand .theirs .ph-art svg { transform: scaleX(-1); }
+.p-hand .ph-art :is(svg, .pic) { width: 100%; height: 100%; display: block; }
+.p-hand .theirs .ph-art svg, .p-hand .mine .ph-art .pic { transform: scaleX(-1); }
 .p-hand .ph-name { font: 400 12px/1.05 var(--display); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .p-hand .ph-body .hpbar { width: 100%; }
 .p-hand .ph-hp { font: 600 10px/1 var(--num); color: var(--card-muted); font-variant-numeric: tabular-nums; }
@@ -52,7 +52,7 @@
   transform: rotate(var(--r)) translateY(var(--y)); transform-origin: 50% 120%; transition: transform .15s; }
 .p-hand .ph-card .cost { position: absolute; top: -9px; left: -8px; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--accent-ink); font: 700 13px/1 var(--num); border: 2px solid var(--card-ink); }
 .p-hand .ph-card .face { width: 100%; min-height: 0; display: grid; place-items: center; background: color-mix(in srgb, var(--el) 22%, var(--card)); border-radius: 6px; overflow: hidden; }
-.p-hand .ph-card .face svg { height: 100%; max-height: 54px; width: auto; aspect-ratio: 1; display: block; }
+.p-hand .ph-card .face :is(svg, .pic) { height: 100%; max-height: 54px; width: auto; aspect-ratio: 1; display: block; }
 .p-hand .ph-card .cn { font: 400 12px/1.05 var(--display); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .p-hand .ph-card .cv { font: 700 12px/1.1 var(--num); color: #9a2a14; white-space: nowrap; }
 .p-hand .ph-card.k-guard .cv { color: #1f5ea0; }
