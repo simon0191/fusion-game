@@ -194,3 +194,37 @@ button.mchip.pickable { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 6
 .hud-btns { display: flex; gap: 8px; }
 .btn.mute { min-width: 44px; padding: 10px; }
 .seg button.mute[aria-pressed="true"] { background: var(--panel-2); color: inherit; border-color: var(--line); }
+
+/* ---------- Enemy scouting: stats on the enemy plate and strip, full sheet on tap ---------- */
+.plate .sp-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font: 500 10px/1 var(--num); color: var(--muted); }
+.plate .sp-st b { font: 600 13px/1 var(--num); color: var(--fg); }
+.plate .sp-ab { font-size: 11px; line-height: 1.25; }
+.plate .sp-ab b { color: var(--accent); font-weight: 600; }
+.plate .sp-beats { display: grid; gap: 2px; font: 500 10px/1.2 var(--num); color: var(--muted); }
+.dot { color: var(--c); font-weight: 600; text-transform: capitalize; }
+.dot::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--c); margin-right: 2px; }
+.battle .plate.theirs { width: 58%; }
+.battle .team.theirs .mchip .xs { grid-column: 2; display: flex; align-items: center; gap: 4px; font: 500 9px/1 var(--num); color: var(--card-muted); white-space: nowrap; }
+.battle .team.theirs .mchip .xs .chip { padding: 2px 3px; font-size: 8px; }
+.battle .team.theirs .mchip :is(svg, .pic) { grid-row: 1 / 4; }
+.battle .team.theirs .mchip .hpbar { grid-column: 2; }
+.battle .team.theirs .mchip.inspect { cursor: pointer; }
+.battle .team.theirs .mchip.inspect::after { content: "i"; position: absolute; top: -6px; right: -6px; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font: italic 700 11px/16px var(--body); text-align: center; }
+.sheet-bg { position: fixed; inset: 0; background: rgba(5,12,16,.6); z-index: 10; }
+.sheet { position: fixed; left: 50%; bottom: 0; transform: translateX(-50%); width: min(560px, 100%); max-height: 88%; overflow-y: auto; z-index: 11; background: var(--panel); border: 1px solid var(--line); border-bottom: 0; border-radius: 16px 16px 0 0; padding: 14px 16px calc(16px + var(--safe-b)); display: grid; gap: 12px; }
+.sheet-x { position: absolute; top: 8px; right: 10px; width: 36px; height: 36px; border-radius: 50%; background: var(--panel-2); border: 1px solid var(--line); font: 600 20px/1 var(--body); }
+.sheet-card { display: grid; justify-items: center; gap: 6px; }
+.sheet-card .card { max-width: 190px; }
+.sheet-hp { font: 600 12px var(--num); color: var(--muted); }
+.sheet-hp b { color: var(--fg); }
+.cmp { width: 100%; border-collapse: collapse; font: 500 12px/1.2 var(--num); }
+.cmp th, .cmp td { padding: 5px 4px; text-align: center; border-bottom: 1px solid var(--line); }
+.cmp th:first-child { text-align: left; font: 400 13px/1.1 var(--display); }
+.cmp th:first-child .els { margin-left: 3px; }
+.cmp thead th { font: 500 10px var(--num); color: var(--muted); letter-spacing: .06em; }
+.cmp tr.ko { opacity: .45; }
+.cmp tr.sub th { padding-top: 10px; font: 500 10px var(--num); color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+.enemy-tag { font: 600 9px/1 var(--num); text-transform: uppercase; letter-spacing: .06em; padding: 2px 4px; border-radius: 4px; background: var(--bad); color: #fff; vertical-align: middle; }
+.cmp td.up { color: var(--good); } .cmp td.down { color: var(--bad); }
+.mu-tag { display: inline-block; padding: 3px 5px; border-radius: 5px; background: var(--mu); color: #fff; font: 600 10px/1 var(--num); white-space: nowrap; }
+.mu-tag.good { --mu: #2f9d5a; } .mu-tag.even { --mu: #b88a12; } .mu-tag.risky { --mu: #d1453b; }

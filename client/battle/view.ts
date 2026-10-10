@@ -5,7 +5,8 @@ import { ABILITIES } from "../../shared/data/abilities.js";
 import { S, partyCards, save } from "../state/store.js";
 import { openScreen } from "../router.js";
 import { $, esc } from "../util.js";
-import { hpClass, miniStats } from "./cards.js";
+import { cardHTML, hpClass, miniStats } from "./cards.js";
+import { inspectHTML } from "./scout.js";
 import { battleHTML, plateInner, scoreHTML, teamHTML } from "./markup.js";
 import { animAttack, enterFx, floatText, hitFx, koFx, setSpeed, setupFx, sleep } from "./fx.js";
 import { timingTap } from "./timing.js";
@@ -109,7 +110,7 @@ function finish(battle: BattleState) {
   b = null;
   music(null);
   if (battle.result === "win") jingles.victory(); else jingles.defeat();
-  if (battle.result === "win") showReward(battle.opp, battle.turn, battle.theirs);
+  if (battle.result === "win") showReward(battle.theirs);
   else showLost(battle.opp, battle.turn);
 }
 
@@ -137,7 +138,7 @@ function refresh() {
   for (const side of ["mine", "theirs"] as Side[]) {
     const f = fighter(b, side);
     const plate = $(`.plate.${side}`);
-    if (f && plate) plate.innerHTML = plateInner(f);
+    if (f && plate) plate.innerHTML = plateInner(f, side);
     for (const x of b[side]) {
       const el = $(`[data-mini="${side}-${x.id}"]`);
       if (!el) continue;
@@ -157,8 +158,17 @@ const say = (html: string) => { const p = $("#prompt"); if (p) p.innerHTML = htm
 const log = (html: string) => $("#blog")?.insertAdjacentHTML("afterbegin", `<li>${html}</li>`);
 
 function onClick(e: MouseEvent) {
-  const t = (e.target as HTMLElement).closest("button");
-  if (!t || !b) return;
+  const el = e.target as HTMLElement;
+  if (!b) return;
+  if (el.closest("[data-close-inspect]")) { $("#inspect")!.innerHTML = ""; return; }
+  const ins = el.closest<HTMLElement>("[data-inspect]");
+  if (ins && !$("#arena .tap")) {
+    const f = b.theirs.find(x => x.id === ins.dataset.inspect);
+    if (f) $("#inspect")!.innerHTML = inspectHTML(f, b.mine, S.tuning, cardHTML(f));
+    return;
+  }
+  const t = el.closest("button");
+  if (!t) return;
   const d = t.dataset;
   if (d.fight && pickResolve) {
     const r = pickResolve; pickResolve = null;

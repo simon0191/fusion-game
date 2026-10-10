@@ -99,12 +99,13 @@ export const hpClass = (f: Fighter) => { const p = f.hp / f.maxHp; return p > 0.
 export const miniStats = (f: Fighter) => `${f.hp}/${f.maxHp} HP · ATK ${f.atk} · ${ABILITIES[f.ab.type].name}`;
 
 /** A monster in battle: a small strip chip for the enemy, a card in your hand for yours. */
-export function chipHTML(f: Fighter, side: string, { pickable = false, active = false } = {}) {
-  const tag = pickable ? "button" : "div";
-  return `<${tag} class="mchip${f.hp <= 0 ? " ko" : ""}${active ? " active" : ""}${pickable ? " pickable" : ""}" style="--el:${elColor(f)}" ${pickable ? `type="button" data-fight="${f.id}" aria-label="Fight with ${esc(f.name)}"` : ""} data-mini="${side}-${f.id}">
+export function chipHTML(f: Fighter, side: string, { pickable = false, active = false, inspect = false, extra = "" } = {}) {
+  const tag = pickable || inspect ? "button" : "div";
+  const attrs = pickable ? `type="button" data-fight="${f.id}" aria-label="Fight with ${esc(f.name)}"` : inspect ? `type="button" data-inspect="${f.id}" aria-label="See ${esc(f.name)} stats"` : "";
+  return `<${tag} class="mchip${f.hp <= 0 ? " ko" : ""}${active ? " active" : ""}${pickable ? " pickable" : ""}${inspect ? " inspect" : ""}" style="--el:${elColor(f)}" ${attrs} data-mini="${side}-${f.id}">
     ${monsterArt(f)}
     <span class="mn">${esc(f.name)}</span>
     <span class="ms">${miniStats(f)}</span>
-    <span class="hpbar"><span class="${hpClass(f)}" style="width:${(f.hp / f.maxHp) * 100}%"></span></span>
+    <span class="hpbar"><span class="${hpClass(f)}" style="width:${(f.hp / f.maxHp) * 100}%"></span></span>${extra}
   </${tag}>`;
 }
