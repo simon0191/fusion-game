@@ -10,23 +10,32 @@ import { inspectHTML } from "./scout.js";
 import { battleHTML, plateInner, scoreHTML, teamHTML } from "./markup.js";
 import { animAttack, enterFx, floatText, hitFx, koFx, setSpeed, setupFx, sleep } from "./fx.js";
 import { timingTap } from "./timing.js";
-import { showLost, showReward } from "../screens/after.js";
-import { castSound, cry, gradeSound, hitSound, jingles, sfx } from "../audio/sfx.js";
-import { music } from "../audio/music.js";
+import { castSound, cry, gradeSound, hitSound, sfx } from "../audio/sfx.js";
+import { type BattleMechanic, finishBattle, switchMode } from "./modes.js";
+import type { BattleMode } from "../state/store.js";
 
 let b: BattleState | null = null;
 let pickResolve: ((id: string) => void) | null = null;
 let picking = false;
 
-export function startBattle(opp: Opponent) {
+function startBattle(opp: Opponent) {
   b = createBattle(partyCards(), opp);
   setSpeed(S.speed);
-  jingles.challenge();
-  music("battle");
   render();
   log(`${esc(opp.name)}: "${esc(opp.line)}"`);
   void loop(b);
 }
+
+/** Abandons the running battle without a result. Its loop sees `over` and exits. */
+function stopBattle() {
+  if (!b) return;
+  b.over = true;
+  b = null;
+  picking = false;
+  if (pickResolve) { const r = pickResolve; pickResolve = null; r(""); }
+}
+
+export const classic: BattleMechanic = { start: startBattle, stop: stopBattle };
 
 async function loop(battle: BattleState) {
   const T = S.tuning;
@@ -99,19 +108,8 @@ async function play(events: BattleEvent[], battle: BattleState) {
 }
 
 function finish(battle: BattleState) {
-  const skipped = battle.endReason === "skipped";
-  if (!S.tuning.alwaysWin && !skipped) {
-    S.stats.battles++;
-    if (battle.result === "win") S.stats.wins++;
-    S.stats.turns.push(battle.turn);
-  }
-  if (battle.result === "win" && !S.beaten.includes(battle.opp.id)) S.beaten.push(battle.opp.id);
-  save();
   b = null;
-  music(null);
-  if (battle.result === "win") jingles.victory(); else jingles.defeat();
-  if (battle.result === "win") showReward(battle.theirs);
-  else showLost(battle.opp, battle.turn);
+  finishBattle(battle.opp, battle.result === "win", battle.turn, battle.theirs, battle.endReason === "skipped");
 }
 
 /* ---------- Rendering ---------- */
@@ -177,6 +175,8 @@ function onClick(e: MouseEvent) {
   } else if (d.speed) {
     S.speed = Number(d.speed); setSpeed(S.speed); save();
     document.querySelectorAll<HTMLElement>("[data-speed]").forEach(x => x.setAttribute("aria-pressed", String(Number(x.dataset.speed) === S.speed)));
+  } else if (d.mode) {
+    switchMode(d.mode as BattleMode, b.opp);
   } else if (d.winnow !== undefined && S.tuning.alwaysWin && !b.over) {
     const battle = b;
     end(battle, true, "skipped");
