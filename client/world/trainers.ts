@@ -7,8 +7,8 @@ export interface Outfit { main: string; accent: string; pack: string; skin: stri
 
 export interface Trainer {
   group: Group;
-  /** `speed` is 0 when standing still and 1 at full walking speed. */
-  update(dt: number, speed: number, t: number): void;
+  /** `speed` is 0 when standing still and 1 at full walking speed. Returns true on the frame a foot lands. */
+  update(dt: number, speed: number, t: number): boolean;
   dispose(): void;
 }
 
@@ -90,6 +90,7 @@ function animate(rig: Rig): Trainer["update"] {
   return (dt, speed, t) => {
     eased += (speed - eased) * Math.min(1, dt * 10);
     const s = eased;
+    const step = Math.floor(phase / Math.PI);
     phase += dt * rig.stride * Math.max(0.35, s) * (s > 0.02 ? 1 : 0);
     const sw = Math.sin(phase) * rig.swing * s;
     rig.legs[0].rotation.x = sw; rig.legs[1].rotation.x = -sw;
@@ -112,6 +113,7 @@ function animate(rig: Rig): Trainer["update"] {
     for (const e of rig.eyes) e.scale.y = closed ? e.userData.sy * 0.15 : e.userData.sy;
     if (blinkAt < 0) blinkAt = 2 + Math.random() * 3.5;
     rig.extra?.(phase, s, t);
+    return Math.floor(phase / Math.PI) !== step;
   };
 }
 

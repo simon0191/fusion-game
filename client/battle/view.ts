@@ -10,6 +10,8 @@ import { battleHTML, plateInner, scoreHTML, teamHTML } from "./markup.js";
 import { animAttack, enterFx, floatText, hitFx, koFx, setSpeed, setupFx, sleep } from "./fx.js";
 import { timingTap } from "./timing.js";
 import { showLost, showReward } from "../screens/after.js";
+import { castSound, cry, gradeSound, hitSound, jingles, sfx } from "../audio/sfx.js";
+import { music } from "../audio/music.js";
 
 let b: BattleState | null = null;
 let pickResolve: ((id: string) => void) | null = null;
@@ -18,6 +20,8 @@ let picking = false;
 export function startBattle(opp: Opponent) {
   b = createBattle(partyCards(), opp);
   setSpeed(S.speed);
+  jingles.challenge();
+  music("battle");
   render();
   log(`${esc(opp.name)}: "${esc(opp.line)}"`);
   void loop(b);
@@ -28,12 +32,15 @@ async function loop(battle: BattleState) {
   while (!battle.over) {
     const t = enemyPick(battle, Math.random);
     render();
+    sfx("enter"); cry(t, { delay: .15 });
     await enterFx("theirs");
     say(`${esc(battle.opp.name)} sends <b>${esc(t.name)}</b> (${t.els.join("/")}, ${ABILITIES[t.ab.type].name}). Tap one of your monsters to fight it.`);
     const id = await new Promise<string>(r => { pickResolve = r; markPickable(true); });
     if (battle.over) break;
     choosePick(battle, id);
     render();
+    const mine = fighter(battle, "mine")!;
+    sfx("enter"); cry(mine, { delay: .15 });
     await enterFx("mine");
     say(`Turn ${battle.turn}: <b>${esc(fighter(battle, "mine")!.name)}</b> vs <b>${esc(t.name)}</b>`);
 
@@ -42,7 +49,9 @@ async function loop(battle: BattleState) {
       const a = fighter(battle, side)!, d = fighter(battle, side === "mine" ? "theirs" : "mine")!;
       if (a.hp <= 0 || d.hp <= 0) continue;
       say(side === "mine" ? `<b>${esc(a.name)}</b> attacks!` : `<b>${esc(a.name)}</b> attacks you!`);
-      const grade = await timingTap($("#arena")!, side === "mine" ? "attack" : "defend", () => battle.over);
+      const mode = side === "mine" ? "attack" : "defend";
+      sfx("ring");
+      const grade = await timingTap($("#arena")!, mode, () => battle.over, g => gradeSound(mode, g));
       if (battle.over) return;
       S.stats[grade]++;
       await play(resolveAttack(battle, side, grade, T, Math.random), battle);
@@ -59,7 +68,9 @@ async function play(events: BattleEvent[], battle: BattleState) {
     if (battle.over) return;
     if (e.kind === "hit") {
       const a = fighter(battle, e.from)!, target = fighter(battle, e.to)!;
+      castSound(a.els[0]);
       await animAttack(e.from, e.to, ELEMENTS[a.els[0]].color, e.selfHit);
+      hitSound(a.els[0], { ...e, shielded: !e.selfHit && target.ab.type === "shield" });
       floatText(e.to, e.dmg ? `-${e.dmg}` : "Blocked", e.crit || e.effect === "super" ? "big" : "");
       await hitFx(e.to);
       let msg = e.selfHit ? `<b>${esc(a.name)}</b> trips and hits itself for ${e.dmg}!` : `<b>${esc(a.name)}</b> hits ${esc(target.name)} for ${e.dmg}.`;
@@ -69,12 +80,15 @@ async function play(events: BattleEvent[], battle: BattleState) {
       if (!e.selfHit && e.timing === "perfect") msg += e.from === "mine" ? " Perfect timing!" : " Perfect block!";
       log(msg);
     } else if (e.kind === "heal") {
+      sfx(e.source);
       floatText(e.side, `+${e.amount}`, "heal");
     } else if (e.kind === "thorns") {
+      sfx("thorns");
       floatText(e.side, `-${e.dmg}`, "");
       log(`Thorns hurt ${esc(fighter(battle, e.side)!.name)} for ${e.dmg}.`);
     } else if (e.kind === "ko") {
       refresh();
+      sfx("ko"); cry(battle[e.side].find(f => f.id === e.id)!, { rate: .7, delay: .1 });
       await koFx(e.side);
       log(`<b>${esc(battle[e.side].find(f => f.id === e.id)!.name)}</b> is knocked out!`);
     }
@@ -93,6 +107,8 @@ function finish(battle: BattleState) {
   if (battle.result === "win" && !S.beaten.includes(battle.opp.id)) S.beaten.push(battle.opp.id);
   save();
   b = null;
+  music(null);
+  if (battle.result === "win") jingles.victory(); else jingles.defeat();
   if (battle.result === "win") showReward(battle.opp, battle.turn, battle.theirs);
   else showLost(battle.opp, battle.turn);
 }

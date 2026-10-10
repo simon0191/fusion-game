@@ -3,6 +3,8 @@ import { DEFAULT_TUNING } from "../../shared/tuning.js";
 import { DECK_MAX, S, resetGame, save } from "../state/store.js";
 import { closeScreen, openScreen } from "../router.js";
 import { cardHTML } from "../battle/cards.js";
+import { duckMusic } from "../audio/music.js";
+import { allSamples, allSounds, cry, jingles, sample, sfx, type SampleName, type SoundName } from "../audio/sfx.js";
 
 type NumKey = { [K in keyof Tuning]: Tuning[K] extends number ? K : never }[keyof Tuning];
 const FIELDS: [NumKey, string, number, number, number, (v: number) => string][] = [
@@ -24,6 +26,7 @@ export function showDeck() {
   const avg = st.turns.length ? (st.turns.reduce((a, b) => a + b, 0) / st.turns.length).toFixed(1) : "-";
   const taps = st.perfect + st.good + st.miss;
   const pct = (n: number) => (taps ? Math.round((n / taps) * 100) + "%" : "-");
+  duckMusic(true);
   const o = openScreen(`<div class="screen">
     <div class="topbar"><h2 class="big-title" style="font-size:26px">Your deck</h2><button class="btn primary" type="button" data-close ${S.party.length === 3 ? "" : "disabled"}>Done</button></div>
     <p class="hint">${S.deck.length}/${DECK_MAX} cards. Tap cards to choose your party of 3.${S.party.length === 3 ? "" : ` <b style="color:var(--accent)">Pick ${3 - S.party.length} more.</b>`}</p>
@@ -56,13 +59,27 @@ export function showDeck() {
         <button class="btn small" type="button" data-reset>Reset deck and stats</button>
       </div>
     </details>
+    <details class="panel">
+      <summary>Sound test</summary>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${allSounds.map(n => `<button class="btn small" type="button" data-sound="${n}">${n}</button>`).join("")}
+        ${allSamples.map(n => `<button class="btn small" type="button" data-sample="${n}">${n} (recorded)</button>`).join("")}
+        ${Object.keys(jingles).map(n => `<button class="btn small" type="button" data-jingle="${n}">${n} (jingle)</button>`).join("")}
+        ${S.deck.map(c => `<button class="btn small" type="button" data-cry="${c.id}">${c.name} (cry)</button>`).join("")}
+      </div>
+    </details>
   </div>`);
   o.onclick = e => {
     const t = (e.target as HTMLElement).closest<HTMLElement>("button");
     if (!t) return;
     const d = t.dataset;
-    if (d.party) {
+    if (d.sound) sfx(d.sound as SoundName);
+    else if (d.sample) void sample(d.sample as SampleName);
+    else if (d.jingle) jingles[d.jingle as keyof typeof jingles]();
+    else if (d.cry) cry(S.deck.find(c => c.id === d.cry)!);
+    else if (d.party) {
       const i = S.party.indexOf(d.party);
+      sfx(i >= 0 ? "deselect" : "select");
       if (i >= 0) S.party.splice(i, 1);
       else { if (S.party.length >= 3) S.party.shift(); S.party.push(d.party); }
       save(); keepOpen();

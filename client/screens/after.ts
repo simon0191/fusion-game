@@ -8,6 +8,7 @@ import { cardHTML } from "../battle/cards.js";
 import { fusionImage, fusionText } from "../api.js";
 import { esc } from "../util.js";
 import { ELEMENTS } from "../../shared/data/elements.js";
+import { cry, fusionReveal, sample, sfx } from "../audio/sfx.js";
 
 export function showLost(opp: Opponent, turns: number) {
   const o = openScreen(`<div class="screen center">
@@ -28,7 +29,10 @@ export function showReward(opp: Opponent, turns: number, theirs: Fighter[]) {
   </div>`);
   o.onclick = e => {
     const t = (e.target as HTMLElement).closest<HTMLElement>("[data-take]");
-    if (t) showFusionPick(cards.find(c => c.id === t.dataset.take)!, null);
+    if (!t) return;
+    const c = cards.find(c => c.id === t.dataset.take)!;
+    sfx("select"); cry(c, { delay: .1 });
+    showFusionPick(c, null);
   };
 }
 
@@ -52,7 +56,7 @@ function showFusionPick(taken: Card, partnerId: string | null) {
   o.onclick = e => {
     const t = (e.target as HTMLElement).closest<HTMLElement>("button");
     if (!t) return;
-    if (t.dataset.partner) showFusionPick(taken, t.dataset.partner);
+    if (t.dataset.partner) { sfx("select"); showFusionPick(taken, t.dataset.partner); }
     else if (t.dataset.dofuse !== undefined && partner) void doFuse(taken, partner);
     else if (t.dataset.keep !== undefined) { S.deck.push(taken); save(); closeScreen(); }
   };
@@ -71,6 +75,7 @@ async function doFuse(taken: Card, partner: Card) {
     <div class="fuse-stage fusing">${cardHTML(taken, { cls: "a" })}<span class="plus">+</span>${cardHTML(partner, { cls: "b" })}<div class="glow"></div>${meltHTML(taken, partner)}</div>
     <p class="hint">Fusing the monsters<span class="dots"><b>.</b><b>.</b><b>.</b></span></p>
   </div>`);
+  void sample("fusion");
   const res = fuse(taken, partner, S.tuning);
   const [text, img] = await Promise.all([fusionText(taken, partner, res.outcome), fusionImage(res.child, taken, partner), new Promise(r => setTimeout(r, 2000))]);
   const c = { ...res.child, name: text.name, flavor: text.flavor, ...(img ? { art: img.art } : {}) };
@@ -79,6 +84,7 @@ async function doFuse(taken: Card, partner: Card) {
   const pi = S.party.indexOf(partner.id);
   if (pi >= 0) S.party[pi] = c.id;
   save();
+  fusionReveal(res.outcome, c);
   const d = (v: number, base: number) => { const pct = Math.round((v / base - 1) * 100); return `<span class="${pct >= 0 ? "up" : "down"}">${pct >= 0 ? "+" : ""}${pct}%</span>`; };
   const o = openScreen(`<div class="screen center">
     <div class="flash"></div>

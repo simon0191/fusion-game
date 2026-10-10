@@ -3,6 +3,7 @@ import { fighter, koCount } from "../../shared/battle/engine.js";
 import { S } from "../state/store.js";
 import { chipHTML, hpClass, monsterArt } from "./cards.js";
 import { esc } from "../util.js";
+import { muteButtonHTML } from "../audio/engine.js";
 
 export function scoreHTML(b: BattleState) {
   return `<span>Turn <b>${b.turn}</b>/${S.tuning.turnLimit}</span><span>Your KOs <b>${koCount(b.theirs)}</b>/${S.tuning.kosToWin}</span><span>Their KOs <b>${koCount(b.mine)}</b>/${S.tuning.kosToWin}</span>`;
@@ -20,6 +21,7 @@ function bar(b: BattleState) {
     <div class="row1"><div class="score" id="score">${scoreHTML(b)}</div><button type="button" class="winnow" data-winnow>Win now</button></div>
     <div class="row2">
       <div class="seg" role="group" aria-label="Animation speed">Speed ${[1, 2, 3].map(s => `<button type="button" data-speed="${s}" aria-pressed="${S.speed === s}">${s}×</button>`).join("")}</div>
+      <div class="seg">${muteButtonHTML("")}</div>
     </div>
   </div>`;
 }

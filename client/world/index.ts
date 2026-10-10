@@ -8,6 +8,7 @@ import { buildEnv } from "./scene.js";
 import { Joystick } from "./joystick.js";
 import { BOUNDS, NPC_SPOTS, PLAYER_START } from "./layout.js";
 import { PLAYER_OUTFIT, makeTrainer, npcOutfit } from "./trainers.js";
+import { sfx } from "../audio/sfx.js";
 
 const WALK_SPEED = 5;
 const TALK_RANGE = 2.6;
@@ -53,7 +54,7 @@ export function createWorld(container: HTMLElement, cb: WorldCallbacks): WorldHa
   addEventListener("keyup", e => keys.delete(e.code));
 
   /* ---------- Loop ---------- */
-  let paused = false, raf = 0, last = performance.now(), near: Npc | null = null, nearKey = "";
+  let paused = false, raf = 0, last = performance.now(), near: Npc | null = null, nearKey = "", greeted = "";
   const camOffset = new Vector3();
   const tmp = new Vector3();
 
@@ -102,7 +103,7 @@ export function createWorld(container: HTMLElement, cb: WorldCallbacks): WorldHa
     pos.z = MathUtils.clamp(pos.z, -BOUNDS, BOUNDS);
     pos.y += (env.heightAt(pos.x, pos.z) - pos.y) * Math.min(1, dt * 15);
     const t = now / 1000;
-    player.update(dt, moving ? Math.min(1, len) : 0, t);
+    if (player.update(dt, moving ? Math.min(1, len) : 0, t) && moving) sfx("step", { vol: Math.min(1, len) });
     for (const n of npcs) n.trainer.update(dt, 0, t + n.index * 1.3);
     env.update(t, pos);
 
@@ -152,7 +153,9 @@ export function createWorld(container: HTMLElement, cb: WorldCallbacks): WorldHa
     const key = near ? `${near.opp.id}|${isLocked(near)}|${partyOk}|${S.beaten.includes(near.opp.id)}` : "";
     if (key === nearKey) return;
     nearKey = key;
-    if (!near) { box.hidden = true; box.innerHTML = ""; return; }
+    if (!near) { box.hidden = true; box.innerHTML = ""; greeted = ""; return; }
+    if (near.opp.id !== greeted) sfx("near");
+    greeted = near.opp.id;
     const n = near, locked = isLocked(n), beaten = S.beaten.includes(n.opp.id);
     const prev = n.index > 0 ? OPPONENTS[n.index - 1].name : "";
     box.innerHTML = `<div class="say"><b>${esc(n.opp.name)}:</b> ${locked ? `Come back after you beat ${esc(prev)}.` : `"${esc(n.opp.line)}"`}</div>
