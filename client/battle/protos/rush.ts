@@ -11,6 +11,7 @@ import { $, esc } from "../../util.js";
 import { hpClass, monsterArt } from "../cards.js";
 import { animAttack, enterFx, floatText, hitFx, koFx, setSpeed, setupFx } from "../fx.js";
 import { type BattleMechanic, finishBattle, modeBarHTML, switchMode } from "../modes.js";
+import { muteButtonHTML } from "../../audio/engine.js";
 
 const COUNTDOWN_MS = 3000;
 const STEP_MS = 20;
@@ -194,7 +195,7 @@ function screenHTML(s: RushState) {
         <div class="score"><span class="r-time" id="rTime">${fmtTime(RUSH.timeLimitMs)}</span><span>Your KOs <b id="rMyKO">0</b>/${T.kosToWin}</span><span>Their KOs <b id="rTheirKO">0</b>/${T.kosToWin}</span></div>
         <button type="button" class="winnow" data-winnow>Win now</button>
       </div>
-      <div class="row2">${modeBarHTML()}</div>
+      <div class="row2">${modeBarHTML()}<div class="seg">${muteButtonHTML("")}</div></div>
     </div>
     <div class="r-foes"><span class="oppname">${esc(s.opp.name)}</span>${foesHTML(s)}</div>
     <div class="arena" id="arena">

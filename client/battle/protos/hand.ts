@@ -13,6 +13,7 @@ import { $, esc } from "../../util.js";
 import { hpClass, monsterArt } from "../cards.js";
 import { setSpeed } from "../fx.js";
 import { type BattleMechanic, finishBattle, modeBarHTML, switchMode } from "../modes.js";
+import { muteButtonHTML } from "../../audio/engine.js";
 
 /** One running battle. `stop` flips `alive`, which every await checks before touching the screen. */
 interface Run { s: HandState; alive: boolean; busy: boolean; selected: ActionCard | null; timers: Set<number>; wakers: Set<() => void> }
@@ -69,7 +70,7 @@ function shellHTML(r: Run) {
     <div class="bbar">
       <div class="row1"><div class="score" id="phScore"></div><button type="button" class="winnow" data-winnow>Win now</button></div>
       <div class="row2">${modeBarHTML()}
-        <div class="seg" role="group" aria-label="Animation speed">${[1, 2, 3].map(v => `<button type="button" data-speed="${v}" aria-pressed="${S.speed === v}">${v}×</button>`).join("")}</div>
+        <div class="seg" role="group" aria-label="Animation speed">${[1, 2, 3].map(v => `<button type="button" data-speed="${v}" aria-pressed="${S.speed === v}">${v}×</button>`).join("")}${muteButtonHTML("")}</div>
       </div>
     </div>
     <div class="ph-opp">${esc(r.s.opp.name)}</div>
@@ -261,7 +262,7 @@ async function finish(r: Run) {
   log(r, r.s.endReason === "knockouts" ? (r.s.result === "win" ? "You win!" : "You lose.") : `${r.s.result === "win" ? "You win" : "You lose"}: ${esc(r.s.endReason)}.`);
   await wait(r, 1100);
   if (!r.alive || run !== r) return;
-  finishBattle(r.s.opp, r.s.result === "win", r.s.turn, r.s.theirs);
+  finishBattle(r.s.opp, r.s.result === "win", r.s.turn, r.s.theirs.map(f => f.card));
 }
 
 /* ---------- Input ---------- */
@@ -278,7 +279,7 @@ function onClick(ev: MouseEvent) {
     document.querySelectorAll<HTMLElement>(".p-hand [data-speed]").forEach(x => x.setAttribute("aria-pressed", String(Number(x.dataset.speed) === S.speed)));
     return;
   }
-  if (d.winnow !== undefined) return finishBattle(s.opp, true, s.turn, s.theirs, true);
+  if (d.winnow !== undefined) return finishBattle(s.opp, true, s.turn, s.theirs.map(f => f.card), true);
   if (s.phase !== "player" || r.busy) return;
   if (d.card) {
     const c = s.hand.find(x => String(x.uid) === d.card);

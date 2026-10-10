@@ -49,6 +49,8 @@ export type Intent =
   | { kind: "heal"; target: string; amount: number };
 
 export interface HFighter extends Card {
+  /** The card as it was before this mode scaled its HP; rewards come from here. */
+  card: Card;
   hp: number;
   block: number;
   /** Burn damage per enemy phase and phases left. */
@@ -114,7 +116,7 @@ const shuffle = <T>(list: T[], rng: Rng) => {
 };
 
 const toFighter = (c: Card, hpScale = HP_MULT): HFighter => ({
-  ...c, els: [...c.els], ab: { ...c.ab }, look: { ...c.look },
+  ...c, card: c, els: [...c.els], ab: { ...c.ab }, look: { ...c.look },
   maxHp: Math.round(c.maxHp * hpScale), hp: Math.round(c.maxHp * hpScale),
   block: 0, burn: 0, burnTurns: 0, thorns: 0, charged: false, intent: null, last: null,
 });

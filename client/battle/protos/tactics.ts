@@ -14,6 +14,7 @@ import { plateInner } from "../markup.js";
 import { animAttack, enterFx, floatText, hitFx, koFx, setSpeed, setupFx, speed } from "../fx.js";
 import { timingTap } from "../timing.js";
 import { type BattleMechanic, finishBattle, modeBarHTML, switchMode } from "../modes.js";
+import { muteButtonHTML } from "../../audio/engine.js";
 
 type Mode = "idle" | "act" | "swap" | "replace";
 
@@ -278,7 +279,7 @@ function screenHTML(b: TacticsState) {
     <div class="bbar">
       <div class="row1"><div class="score" id="score">${scoreHTML(b)}</div><button type="button" class="winnow" data-winnow>Win now</button></div>
       <div class="row2"><div class="seg" role="group" aria-label="Animation speed">Speed ${[1, 2, 3].map(s => `<button type="button" data-speed="${s}" aria-pressed="${S.speed === s}">${s}×</button>`).join("")}</div></div>
-      <div class="row2">${modeBarHTML()}</div>
+      <div class="row2">${modeBarHTML()}<div class="seg">${muteButtonHTML("")}</div></div>
     </div>
     <div class="tt-team theirs" id="ttTheirs" aria-label="${esc(b.opp.name)}'s team">${teamHTML(b, "theirs", false)}</div>
     <div class="arena" id="arena">
