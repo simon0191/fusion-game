@@ -1,7 +1,7 @@
 import "./styles/main.css";
 import { createWorld } from "./world/index.js";
 import { closeScreen, setWorld } from "./router.js";
-import { startBattle } from "./battle/view.js";
+import { startBattle } from "./battle/modes.js";
 import { showDeck } from "./screens/deck.js";
 import { showSettings } from "./screens/settings.js";
 import { $ } from "./util.js";
