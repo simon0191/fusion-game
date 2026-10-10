@@ -13,6 +13,7 @@ import { $, esc } from "../../util.js";
 import { hpClass, monsterArt } from "../cards.js";
 import { setSpeed } from "../fx.js";
 import { type BattleMechanic, finishBattle, modeBarHTML, switchMode } from "../modes.js";
+import { castSound, cry, hitSound, sfx } from "../../audio/sfx.js";
 import { muteButtonHTML } from "../../audio/engine.js";
 
 /** One running battle. `stop` flips `alive`, which every await checks before touching the screen. */
@@ -188,7 +189,8 @@ function lunge(id: string, down: boolean) {
   bodyOf(id)?.animate([{ transform: "none" }, { transform: `translateY(${down ? 18 : -18}px) scale(1.06)` }, { transform: "none" }], { duration: 360 / S.speed, easing: "ease-in-out" });
 }
 
-const nameOf = (s: HandState, id: string) => esc([...s.mine, ...s.theirs].find(f => f.id === id)?.name ?? "");
+const fighterOf = (s: HandState, id: string) => [...s.mine, ...s.theirs].find(f => f.id === id);
+const nameOf = (s: HandState, id: string) => esc(fighterOf(s, id)?.name ?? "");
 
 /** Shows what happened. The DOM already holds the new state; floats and shakes play on top of it. */
 function showEvents(r: Run, ev: HandEvent[]) {
@@ -196,19 +198,24 @@ function showEvents(r: Run, ev: HandEvent[]) {
   const s = r.s;
   for (const e of ev) {
     if (e.kind === "hit") {
+      const a = fighterOf(s, e.from);
+      if (a) {
+        castSound(a.els[0]);
+        hitSound(a.els[0], { dmg: e.dmg, crit: false, effect: e.effect, selfHit: !!e.selfHit, shielded: e.blocked > 0 });
+      }
       float(e.to, e.dmg ? `-${e.dmg}` : "Blocked", e.effect === "super" ? "big" : "");
       shake(e.to);
       let msg = e.selfHit ? `<b>${nameOf(s, e.from)}</b> trips and hits itself for ${e.dmg}!` : `<b>${nameOf(s, e.from)}</b> hits ${nameOf(s, e.to)} for ${e.dmg}${e.blocked ? ` (${e.blocked} blocked)` : ""}.`;
       if (e.effect === "super") msg += " Super effective!";
       if (e.effect === "weak") msg += " Not very effective.";
       log(r, msg);
-    } else if (e.kind === "block") { float(e.id, `+${e.amount} block`, "blk"); log(r, `${nameOf(s, e.id)} gains ${e.amount} block.`); }
-    else if (e.kind === "heal") { float(e.id, `+${e.amount}`, "heal"); log(r, `${nameOf(s, e.id)} heals ${e.amount}.`); }
-    else if (e.kind === "burn") { float(e.id, `-${e.dmg}`, "burn"); shake(e.id); log(r, `${nameOf(s, e.id)} burns for ${e.dmg}.`); }
-    else if (e.kind === "thorns") { float(e.id, `-${e.dmg}`); log(r, `Spikes hurt ${nameOf(s, e.id)} for ${e.dmg}.`); }
-    else if (e.kind === "charge") { float(e.id, "Charging!", "big"); log(r, `${nameOf(s, e.id)} is charging up. Its next attack does double damage.`); }
+    } else if (e.kind === "block") { sfx("blockGood"); float(e.id, `+${e.amount} block`, "blk"); log(r, `${nameOf(s, e.id)} gains ${e.amount} block.`); }
+    else if (e.kind === "heal") { sfx("heal"); float(e.id, `+${e.amount}`, "heal"); log(r, `${nameOf(s, e.id)} heals ${e.amount}.`); }
+    else if (e.kind === "burn") { sfx("hitFire", { vol: .5 }); float(e.id, `-${e.dmg}`, "burn"); shake(e.id); log(r, `${nameOf(s, e.id)} burns for ${e.dmg}.`); }
+    else if (e.kind === "thorns") { sfx("thorns"); float(e.id, `-${e.dmg}`); log(r, `Spikes hurt ${nameOf(s, e.id)} for ${e.dmg}.`); }
+    else if (e.kind === "charge") { const f = fighterOf(s, e.id); if (f) castSound(f.els[0]); float(e.id, "Charging!", "big"); log(r, `${nameOf(s, e.id)} is charging up. Its next attack does double damage.`); }
     else if (e.kind === "status") float(e.id, e.text, "blk");
-    else if (e.kind === "ko") log(r, `<b>${nameOf(s, e.id)}</b> is knocked out!${e.mine ? " Its cards are now Fainted." : ""}`);
+    else if (e.kind === "ko") { sfx("ko"); const f = fighterOf(s, e.id); if (f) cry(f, { rate: .7, delay: .1 }); log(r, `<b>${nameOf(s, e.id)}</b> is knocked out!${e.mine ? " Its cards are now Fainted." : ""}`); }
     else if (e.kind === "reshuffle") log(r, "Discard pile shuffled into the draw pile.");
   }
 }

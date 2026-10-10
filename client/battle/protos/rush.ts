@@ -11,6 +11,7 @@ import { $, esc } from "../../util.js";
 import { hpClass, monsterArt } from "../cards.js";
 import { animAttack, enterFx, floatText, hitFx, koFx, setSpeed, setupFx } from "../fx.js";
 import { type BattleMechanic, finishBattle, modeBarHTML, switchMode } from "../modes.js";
+import { castSound, cry, hitSound, sfx } from "../../audio/sfx.js";
 import { muteButtonHTML } from "../../audio/engine.js";
 
 const COUNTDOWN_MS = 3000;
@@ -120,6 +121,9 @@ function play(r: Run, events: RushEvent[]) {
       case "hit": {
         const a = r.shown[e.from];
         if (e.move !== "counter" || e.dmg > 0) void animAttack(e.from, e.to, ELEMENTS[a.els[0]].color, e.selfHit);
+        castSound(a.els[0]);
+        const h = { ...e, shielded: e.block === "half" };
+        later(r, e.selfHit ? 200 : 330, () => hitSound(a.els[0], h));
         floatText(e.to, e.dmg ? `-${e.dmg}` : "Blocked", e.crit || e.effect === "super" || e.charge > 0.6 ? "big" : "");
         void hitFx(e.to);
         if (e.crit) call("Lucky hit!", "crit");
@@ -128,30 +132,35 @@ function play(r: Run, events: RushEvent[]) {
         else if (e.effect === "super" && e.move !== "special") call("Super effective!", "");
         break;
       }
-      case "heal": floatText(e.side, `+${e.amount}`, "heal"); break;
-      case "thorns": floatText(e.side, `-${e.dmg}`, "thorn"); break;
-      case "burn": floatText(e.side, `-${e.dmg}`, "burn"); void hitFx(e.side); break;
+      case "heal": sfx("heal"); floatText(e.side, `+${e.amount}`, "heal"); break;
+      case "thorns": sfx("thorns"); floatText(e.side, `-${e.dmg}`, "thorn"); break;
+      case "burn": sfx("hitFire", { vol: .4 }); floatText(e.side, `-${e.dmg}`, "burn"); void hitFx(e.side); break;
       case "ko":
         r.koAt[e.side] = performance.now();
+        sfx("ko");
+        { const f = r.s[e.side].team.find(x => x.id === e.id); if (f) cry(f, { rate: .7, delay: .1 }); }
         void koFx(e.side);
         break;
       case "block":
-        if (e.grade === "perfect") call("Perfect block!", "perfect");
-        else if (e.grade === "half") call("Blocked!", "good");
-        else call("Too early", "miss");
+        if (e.grade === "perfect") { sfx("blockPerfect"); call("Perfect block!", "perfect"); }
+        else if (e.grade === "half") { sfx("blockGood"); call("Blocked!", "good"); }
+        else { sfx("miss"); call("Too early", "miss"); }
         break;
-      case "chargeBroken": call("Charge broken!", "miss"); break;
-      case "special": call(`${e.side === "theirs" ? "Enemy " : ""}${SPECIAL_NAMES[e.type]}!`, e.side === "mine" ? "special" : "foe"); break;
+      case "chargeBroken": sfx("miss"); call("Charge broken!", "miss"); break;
+      case "special": sfx("tapPerfect"); call(`${e.side === "theirs" ? "Enemy " : ""}${SPECIAL_NAMES[e.type]}!`, e.side === "mine" ? "special" : "foe"); break;
       case "swap": {
         const side = e.side;
         const wait = performance.now() - r.koAt[side] < 800 ? 750 : 0;
         if (side === "mine") r.queuedTap = false;
+        sfx("enter");
+        { const f = r.s[side].team.find(x => x.id === e.id); if (f) cry(f, { delay: .15 }); }
         if (wait) later(r, wait, () => showSide(r, side));
         else showSide(r, side);
         break;
       }
       case "end": call(e.win ? "You win!" : "You lose", e.win ? "perfect" : "miss"); break;
-      case "windup": case "needPick": break;
+      case "windup": sfx("ring"); break;
+      case "needPick": break;
     }
   }
 }

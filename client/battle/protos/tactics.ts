@@ -13,6 +13,7 @@ import { hpClass, monsterArt } from "../cards.js";
 import { plateInner } from "../markup.js";
 import { animAttack, enterFx, floatText, hitFx, koFx, setSpeed, setupFx, speed } from "../fx.js";
 import { timingTap } from "../timing.js";
+import { castSound, cry, gradeSound, hitSound, sfx } from "../../audio/sfx.js";
 import { type BattleMechanic, finishBattle, modeBarHTML, switchMode } from "../modes.js";
 import { muteButtonHTML } from "../../audio/engine.js";
 
@@ -99,6 +100,7 @@ function pick(r: Run, a: Action) {
 
 async function loop(r: Run) {
   const b = r.b, T = S.tuning;
+  sfx("enter"); cry(active(b, "theirs"), { delay: .15 }); cry(active(b, "mine"), { delay: .5 });
   await Promise.all([enterFx("theirs"), enterFx("mine")]);
   while (!b.over) {
     if (r.dead) return;
@@ -106,6 +108,7 @@ async function loop(r: Run) {
       sendIn(b, "theirs", bestReplacement(b, "theirs", Math.random, 4));
       drawSlot(b, "theirs");
       log(`${esc(b.opp.name)} sends in <b>${esc(active(b, "theirs").name)}</b>.`);
+      sfx("enter"); cry(active(b, "theirs"), { delay: .15 });
       await enterFx("theirs");
     }
     if (needsReplacement(b, "mine")) {
@@ -115,6 +118,7 @@ async function loop(r: Run) {
       sendIn(b, "mine", a.to);
       drawSlot(b, "mine");
       log(`You send in <b>${esc(active(b, "mine").name)}</b>.`);
+      sfx("enter"); cry(active(b, "mine"), { delay: .15 });
       await enterFx("mine");
     }
     if (r.dead) return;
@@ -136,7 +140,9 @@ async function loop(r: Run) {
       const special = b.acts[side]?.kind === "special";
       const what = special ? SPECIALS[a.ab.type].name : "Strike";
       say(side === "mine" ? `<b>${esc(a.name)}</b> uses ${what}! Tap when the rings meet.` : `<b>${esc(a.name)}</b> uses ${what} on you! Tap to ${b.shield.mine || (b.guard.mine && !special) ? "power your counter" : "block"}.`);
-      const grade = await timingTap($("#arena")!, side === "mine" ? "attack" : "defend", () => r.dead);
+      const mode = side === "mine" ? "attack" : "defend";
+      sfx("ring");
+      const grade = await timingTap($("#arena")!, mode, () => r.dead, g => gradeSound(mode, g));
       if (r.dead) return;
       S.stats[grade]++;
       await playEvents(r, resolveAction(b, side, grade, T, Math.random));
@@ -168,26 +174,33 @@ async function playEvents(r: Run, events: TEvent[]) {
       case "swap":
         drawSlot(b, e.side);
         log(`${e.side === "mine" ? "You swap" : `${esc(b.opp.name)} swaps`} <b>${nm(e.side, e.from)}</b> out for <b>${nm(e.side, e.to)}</b>.`);
+        sfx("enter"); cry(active(b, e.side), { delay: .15 });
         await enterFx(e.side);
         break;
       case "guard":
+        sfx("blockGood");
         floatText(e.side, "Guard", "tt-note");
         break;
       case "shieldUp":
+        sfx("blockPerfect");
         floatText(e.side, "Bulwark!", "tt-note");
         log(`<b>${nm(e.side)}</b> raises Bulwark and will block every hit.`);
         break;
       case "reflectUp":
+        sfx("thorns");
         floatText(e.side, "Spikes!", "tt-note");
         break;
       case "special":
+        sfx("tapPerfect");
         floatText(e.side, SPECIALS[active(b, e.side).ab.type].name + "!", "big");
         await wait(r, 250);
         break;
       case "hit": {
         const a = active(b, e.from);
+        castSound(a.els[0]);
         await animAttack(e.from, e.to, ELEMENTS[a.els[0]].color, e.selfHit);
         if (r.dead) return;
+        hitSound(a.els[0], { ...e, shielded: !!e.blocked });
         floatText(e.to, e.dmg ? `-${e.dmg}` : "Blocked", e.crit || e.effect === "super" ? "big" : "");
         await hitFx(e.to);
         let msg = e.selfHit ? `<b>${nm(e.from)}</b> trips and hits itself for ${e.dmg}!`
@@ -202,14 +215,16 @@ async function playEvents(r: Run, events: TEvent[]) {
         break;
       }
       case "reflect":
+        sfx("thorns"); sfx("impact");
         floatText(e.side, `-${e.dmg}`, "big");
         await hitFx(e.side);
         log(`Spikes bounce the hit back. <b>${nm(e.side)}</b> takes ${e.dmg}.`);
         break;
       case "thorns":
-        if (e.dmg) { floatText(e.side, `-${e.dmg}`, ""); log(`Thorns hurt ${nm(e.side)} for ${e.dmg}.`); }
+        if (e.dmg) { sfx("thorns"); floatText(e.side, `-${e.dmg}`, ""); log(`Thorns hurt ${nm(e.side)} for ${e.dmg}.`); }
         break;
       case "heal":
+        sfx("heal");
         floatText(e.side, `+${e.amount}`, "heal");
         if (e.amount >= 8) log(`<b>${nm(e.side)}</b> heals ${e.amount} HP.`);
         break;
@@ -217,11 +232,13 @@ async function playEvents(r: Run, events: TEvent[]) {
         log(`<b>${nm(e.side, e.id)}</b> is burning for ${TACTICS.burnTurns} turns.`);
         break;
       case "burn":
+        sfx("hitFire", { vol: .5 });
         if (e.id === b.active[e.side]) floatText(e.side, `-${e.dmg}`, "tt-burn");
         log(`${nm(e.side, e.id)} burns for ${e.dmg}.`);
         break;
       case "ko":
         drawAll(r);
+        sfx("ko"); cry(b[e.side].find(f => f.id === e.id)!, { rate: .7, delay: .1 });
         if (e.id === b.active[e.side]) await koFx(e.side);
         log(`<b>${nm(e.side, e.id)}</b> is knocked out!`);
         break;
