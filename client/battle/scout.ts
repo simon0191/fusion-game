@@ -1,10 +1,14 @@
 import type { Fighter } from "../../shared/battle/engine.js";
 import type { Element, Tuning } from "../../shared/types.js";
 import { ELEMENTS, elementMultiplier } from "../../shared/data/elements.js";
-import { ABILITIES } from "../../shared/data/abilities.js";
 import { esc } from "../util.js";
 
-/** Enemy scouting: stats on the enemy plate, and a full stats sheet when you tap an enemy card. */
+/** Enemy scouting: a full stats sheet when you tap an enemy card. */
+
+const SYMBOL: Record<Element, string> = { fire: "🔥", water: "💧", leaf: "🍃", rock: "🪨", spark: "⚡", shadow: "🌙" };
+
+/** Element symbols in coloured dots, for the small enemy cards. */
+export const elIcons = (f: Fighter) => f.els.map(e => `<span class="elic" style="--c:${ELEMENTS[e].color}" title="${e}" aria-label="${e}">${SYMBOL[e]}</span>`).join("");
 
 export const elChips = (f: Fighter) => `<span class="els">${f.els.map(e => `<span class="chip" style="--c:${ELEMENTS[e].color}">${e}</span>`).join("")}</span>`;
 
@@ -36,17 +40,6 @@ function matchup(me: Fighter, them: Fighter, T: Tuning) {
 }
 
 const VERDICT: Record<Verdict, string> = { good: "Good pick", even: "Even fight", risky: "Risky" };
-
-/** Element, attack, speed, ability and type matchups, shown under the enemy's HP bar in the arena. */
-export function scoutPlateHTML(f: Fighter) {
-  const ab = ABILITIES[f.ab.type];
-  const weak = (Object.keys(ELEMENTS) as Element[]).filter(e => ELEMENTS[e].beats.includes(f.els[0]));
-  const beats = [...new Set(f.els.flatMap(e => ELEMENTS[e].beats))];
-  const dot = (e: Element) => `<span class="dot" style="--c:${ELEMENTS[e].color}">${e}</span>`;
-  return `<div class="sp-row">${elChips(f)}<span class="sp-st"><b>${f.atk}</b> ATK</span><span class="sp-st"><b>${f.spd}</b> SPD</span></div>
-    <div class="sp-ab"><b>${ab.name}.</b> ${esc(ab.describe(f.ab.v))}</div>
-    <div class="sp-beats"><span>Weak to ${weak.map(dot).join(" ") || "nothing"}</span><span>Strong vs ${beats.map(dot).join(" ")}</span></div>`;
-}
 
 /** Bottom sheet with the enemy's full card and how each of your monsters compares to it. */
 export function inspectHTML(them: Fighter, mine: Fighter[], T: Tuning, cardHTML: string) {

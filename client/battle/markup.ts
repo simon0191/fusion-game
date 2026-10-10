@@ -4,18 +4,18 @@ import { S } from "../state/store.js";
 import { chipHTML, hpClass, monsterArt } from "./cards.js";
 import { esc } from "../util.js";
 import { muteButtonHTML } from "../audio/engine.js";
-import { elChips, scoutPlateHTML } from "./scout.js";
+import { elIcons } from "./scout.js";
 
 export function scoreHTML(b: BattleState) {
   return `<span>Turn <b>${b.turn}</b>/${S.tuning.turnLimit}</span><span>Your KOs <b>${koCount(b.theirs)}</b>/${S.tuning.kosToWin}</span><span>Their KOs <b>${koCount(b.mine)}</b>/${S.tuning.kosToWin}</span>`;
 }
-export const plateInner = (f: Fighter, side: "mine" | "theirs" = "mine") =>
-  `<div class="pn">${esc(f.name)}<span>${f.hp}/${f.maxHp}</span></div><div class="hpbar"><span class="${hpClass(f)}" style="width:${(f.hp / f.maxHp) * 100}%"></span></div>${side === "theirs" ? scoutPlateHTML(f) : ""}`;
+export const plateInner = (f: Fighter) =>
+  `<div class="pn">${esc(f.name)}<span>${f.hp}/${f.maxHp}</span></div><div class="hpbar"><span class="${hpClass(f)}" style="width:${(f.hp / f.maxHp) * 100}%"></span></div>`;
 
 export function teamHTML(b: BattleState, side: "mine" | "theirs", pickable: boolean) {
   const pick = side === "mine" ? b.myPick : b.theirPick;
   return b[side].map(f => side === "theirs"
-    ? chipHTML(f, side, { active: pick === f.id, inspect: true, extra: `<span class="xs">${elChips(f)} ATK ${f.atk} · SPD ${f.spd}</span>` })
+    ? chipHTML(f, side, { active: pick === f.id, inspect: true, extra: `<span class="xs">${elIcons(f)}<span title="Attack / Speed">${f.atk}/${f.spd}</span></span>` })
     : chipHTML(f, side, { pickable: pickable && f.hp > 0, active: pick === f.id })).join("");
 }
 
@@ -32,7 +32,7 @@ function bar(b: BattleState) {
 function arena(b: BattleState) {
   const mp = fighter(b, "mine"), tp = fighter(b, "theirs");
   return `<div class="arena" id="arena">
-    ${tp ? `<div class="plate theirs">${plateInner(tp, "theirs")}</div>` : ""}
+    ${tp ? `<div class="plate theirs">${plateInner(tp)}</div>` : ""}
     ${mp ? `<div class="plate mine">${plateInner(mp)}</div>` : ""}
     <div class="slot theirs">${tp ? `<div class="mon" id="monTheirs">${monsterArt(tp)}</div>` : ""}</div>
     <div class="slot mine">${mp ? `<div class="mon" id="monMine">${monsterArt(mp)}</div>` : ""}</div>

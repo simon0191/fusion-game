@@ -195,21 +195,14 @@ button.mchip.pickable { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 6
 .btn.mute { min-width: 44px; padding: 10px; }
 .seg button.mute[aria-pressed="true"] { background: var(--panel-2); color: inherit; border-color: var(--line); }
 
-/* ---------- Enemy scouting: stats on the enemy plate and strip, full sheet on tap ---------- */
-.plate .sp-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font: 500 10px/1 var(--num); color: var(--muted); }
-.plate .sp-st b { font: 600 13px/1 var(--num); color: var(--fg); }
-.plate .sp-ab { font-size: 11px; line-height: 1.25; }
-.plate .sp-ab b { color: var(--accent); font-weight: 600; }
-.plate .sp-beats { display: grid; gap: 2px; font: 500 10px/1.2 var(--num); color: var(--muted); }
-.dot { color: var(--c); font-weight: 600; text-transform: capitalize; }
-.dot::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--c); margin-right: 2px; }
-.battle .plate.theirs { width: 58%; }
-.battle .team.theirs .mchip .xs { grid-column: 2; display: flex; align-items: center; gap: 4px; font: 500 9px/1 var(--num); color: var(--card-muted); white-space: nowrap; }
-.battle .team.theirs .mchip .xs .chip { padding: 2px 3px; font-size: 8px; }
+/* ---------- Enemy scouting: element and ATK/SPD on the enemy strip, full sheet on tap ---------- */
+.battle .team.theirs .mchip { width: 32%; grid-template-columns: 26px minmax(0, 1fr); column-gap: 4px; padding: 3px 4px; }
+.battle .team.theirs .mchip .mn { grid-column: 2; }
+.battle .team.theirs .mchip .xs { grid-column: 2; display: flex; align-items: center; gap: 3px; min-width: 0; overflow: hidden; font: 600 11px/1 var(--num); color: var(--card-ink); white-space: nowrap; }
+.elic { flex: none; display: inline-grid; place-items: center; width: 15px; height: 15px; border-radius: 50%; background: var(--c); font-size: 9px; line-height: 1; }
 .battle .team.theirs .mchip :is(svg, .pic) { grid-row: 1 / 4; }
 .battle .team.theirs .mchip .hpbar { grid-column: 2; }
 .battle .team.theirs .mchip.inspect { cursor: pointer; }
-.battle .team.theirs .mchip.inspect::after { content: "i"; position: absolute; top: -6px; right: -6px; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font: italic 700 11px/16px var(--body); text-align: center; }
 .sheet-bg { position: fixed; inset: 0; background: rgba(5,12,16,.6); z-index: 10; }
 .sheet { position: fixed; left: 50%; bottom: 0; transform: translateX(-50%); width: min(560px, 100%); max-height: 88%; overflow-y: auto; z-index: 11; background: var(--panel); border: 1px solid var(--line); border-bottom: 0; border-radius: 16px 16px 0 0; padding: 14px 16px calc(16px + var(--safe-b)); display: grid; gap: 12px; }
 .sheet-x { position: absolute; top: 8px; right: 10px; width: 36px; height: 36px; border-radius: 50%; background: var(--panel-2); border: 1px solid var(--line); font: 600 20px/1 var(--body); }

@@ -138,7 +138,7 @@ function refresh() {
   for (const side of ["mine", "theirs"] as Side[]) {
     const f = fighter(b, side);
     const plate = $(`.plate.${side}`);
-    if (f && plate) plate.innerHTML = plateInner(f, side);
+    if (f && plate) plate.innerHTML = plateInner(f);
     for (const x of b[side]) {
       const el = $(`[data-mini="${side}-${x.id}"]`);
       if (!el) continue;
