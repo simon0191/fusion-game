@@ -3,6 +3,7 @@ import { ELEMENTS } from "../../shared/data/elements.js";
 import { ABILITIES } from "../../shared/data/abilities.js";
 import type { Fighter } from "../../shared/battle/engine.js";
 import { esc } from "../util.js";
+import { ancestryLine } from "../../shared/fusion/ancestry.js";
 
 let svgUid = 1;
 
@@ -75,6 +76,7 @@ export function cardHTML(c: Card, { tag = "div", attrs = "", selected = false, b
     <div class="ab"><b>${ab.name}.</b> ${ab.describe(c.ab.v)}</div>
     <div class="fl">${esc(c.flavor)}</div>
     ${c.gen ? `<div class="gen">Fusion generation ${c.gen}</div>` : ""}
+    ${c.ancestry ? `<div class="gen">${esc(ancestryLine(c.ancestry))}</div>` : ""}
   </${tag}>`;
 }
 

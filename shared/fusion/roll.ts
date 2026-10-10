@@ -2,6 +2,7 @@ import type { Ability, Card, FusionOutcome, Rng, Tuning } from "../types.js";
 import { ABILITIES, clampAbility } from "../data/abilities.js";
 import { newId, pickOne } from "../rng.js";
 import { mockFusionText } from "./mockText.js";
+import { crossAncestry } from "./ancestry.js";
 
 export interface FusionResult {
   child: Card;
@@ -41,6 +42,7 @@ export function fuse(a: Card, b: Card, T: Tuning, rng: Rng = Math.random): Fusio
   const child: Card = {
     id: newId(), name: text.name, els, maxHp: mix(a.maxHp, b.maxHp), atk: mix(a.atk, b.atk),
     spd: Math.min(12, mix(a.spd, b.spd)), ab, look, flavor: text.flavor, gen: Math.max(a.gen, b.gen) + 1, outcome,
+    ancestry: crossAncestry(a, b, T),
   };
   return { child, outcome, base: { hp: (a.maxHp + b.maxHp) / 2, atk: (a.atk + b.atk) / 2, spd: (a.spd + b.spd) / 2 } };
 }
