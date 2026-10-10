@@ -11,6 +11,7 @@ export interface GameState {
   tuning: Tuning;
   /** Animation speed in battles. */
   speed: number;
+  muted: boolean;
 }
 
 const KEY = "fusion-game-v2";
@@ -20,7 +21,7 @@ const freshStats = (): Stats => ({ battles: 0, wins: 0, turns: [], crit: 0, norm
 
 export function freshGame(tuning: Tuning = { ...DEFAULT_TUNING }): GameState {
   const deck = randomMonsters(DECK_START, Math.random);
-  return { deck, party: deck.slice(0, TEAM_SIZE).map(c => c.id), beaten: [], stats: freshStats(), tuning, speed: 1 };
+  return { deck, party: deck.slice(0, TEAM_SIZE).map(c => c.id), beaten: [], stats: freshStats(), tuning, speed: 1, muted: false };
 }
 
 function load(): GameState {
@@ -41,7 +42,7 @@ export function save() {
 }
 
 export function resetGame() {
-  Object.assign(S, freshGame(S.tuning), { speed: S.speed });
+  Object.assign(S, freshGame(S.tuning), { speed: S.speed, muted: S.muted });
   save();
 }
 

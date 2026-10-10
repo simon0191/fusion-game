@@ -12,7 +12,7 @@ const LEAD_IN_MS = 300;
  * `attack`: a well-timed tap powers up the hit. `defend`: it blocks part of the damage.
  * A tap anywhere on the battle screen counts, except on buttons.
  */
-export function timingTap(arena: HTMLElement, mode: "attack" | "defend", isCancelled: () => boolean): Promise<TimingGrade> {
+export function timingTap(arena: HTMLElement, mode: "attack" | "defend", isCancelled: () => boolean, onGrade?: (g: TimingGrade) => void): Promise<TimingGrade> {
   return new Promise(resolve => {
     const box = document.createElement("div");
     box.className = `tap ${mode}`;
@@ -30,6 +30,7 @@ export function timingTap(arena: HTMLElement, mode: "attack" | "defend", isCance
       surface.removeEventListener("pointerdown", onTap);
       removeEventListener("keydown", onKey);
       ring.remove();
+      onGrade?.(grade);
       const g = document.createElement("div");
       g.className = `grade ${grade}`;
       g.textContent = grade === "perfect" ? (mode === "attack" ? "Perfect!" : "Perfect block!") : grade === "good" ? (mode === "attack" ? "Good" : "Blocked some") : "Miss";

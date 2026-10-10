@@ -207,3 +207,6 @@ button.mchip.pickable { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 6
 .stick { position: fixed; width: 112px; height: 112px; margin: -56px 0 0 -56px; border-radius: 50%; background: rgba(14,27,34,.25); border: 2px solid rgba(255,255,255,.35); pointer-events: none; opacity: .45; transition: opacity .15s; }
 .stick.active { opacity: 1; transition: none; }
 .stick-knob { position: absolute; left: 50%; top: 50%; width: 52px; height: 52px; margin: -26px 0 0 -26px; border-radius: 50%; background: rgba(255,255,255,.85); box-shadow: 0 3px 10px rgba(0,0,0,.35); }
+.hud-btns { display: flex; gap: 8px; }
+.btn.mute { min-width: 44px; padding: 10px; }
+.seg button.mute[aria-pressed="true"] { background: var(--panel-2); color: inherit; border-color: var(--line); }

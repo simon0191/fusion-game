@@ -1,4 +1,5 @@
 import { $ } from "./util.js";
+import { duckMusic, music } from "./audio/music.js";
 
 /** The 3D world sits behind every screen. Opening a screen pauses it; closing resumes it. */
 export interface WorldHandle { pause(): void; resume(): void; refresh(): void; debug(): { x: number; z: number; paused: boolean }; warp(x: number, z: number): void }
@@ -22,4 +23,6 @@ export function closeScreen() {
   o.innerHTML = "";
   world?.refresh();
   world?.resume();
+  duckMusic(false);
+  music("world");
 }
