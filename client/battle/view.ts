@@ -1,14 +1,14 @@
-import type { Opponent, Side } from "../../shared/types";
-import { type BattleEvent, type BattleState, type Fighter, attackOrder, choosePick, createBattle, end, enemyPick, fighter, finishTurn, koCount, resolveAttack } from "../../shared/battle/engine";
-import { ELEMENTS } from "../../shared/data/elements";
-import { ABILITIES } from "../../shared/data/abilities";
-import { S, partyCards, save } from "../state/store";
-import { openScreen } from "../router";
-import { $, esc } from "../util";
-import { hpClass, miniHTML, miniStats, monsterSVG } from "./cards";
-import { animAttack, enterFx, floatText, hitFx, koFx, setSpeed, setupFx, sleep } from "./fx";
-import { timingTap } from "./timing";
-import { showLost, showReward } from "../screens/after";
+import type { Opponent, Side } from "../../shared/types.js";
+import { type BattleEvent, type BattleState, type Fighter, attackOrder, choosePick, createBattle, end, enemyPick, fighter, finishTurn, koCount, resolveAttack } from "../../shared/battle/engine.js";
+import { ELEMENTS } from "../../shared/data/elements.js";
+import { ABILITIES } from "../../shared/data/abilities.js";
+import { S, partyCards, save } from "../state/store.js";
+import { openScreen } from "../router.js";
+import { $, esc } from "../util.js";
+import { hpClass, miniHTML, miniStats, monsterSVG } from "./cards.js";
+import { animAttack, enterFx, floatText, hitFx, koFx, setSpeed, setupFx, sleep } from "./fx.js";
+import { timingTap } from "./timing.js";
+import { showLost, showReward } from "../screens/after.js";
 
 let b: BattleState | null = null;
 let pickResolve: ((id: string) => void) | null = null;

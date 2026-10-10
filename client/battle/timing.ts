@@ -1,4 +1,4 @@
-import type { TimingGrade } from "../../shared/types";
+import type { TimingGrade } from "../../shared/types.js";
 
 /** Ring closes onto the target over this long. The tap window does not change with battle speed. */
 const CLOSE_MS = 950;

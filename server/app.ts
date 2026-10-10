@@ -1,6 +1,6 @@
 import { Hono } from "hono";
-import { FuseRequest, FusionText } from "../shared/fusion/schema";
-import { generateFusionText } from "./ai/text";
+import { FuseRequest, FusionText } from "../shared/fusion/schema.js";
+import { generateFusionText } from "./ai/text.js";
 
 const app = new Hono().basePath("/api");
 

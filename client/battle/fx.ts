@@ -1,5 +1,5 @@
-import type { Side } from "../../shared/types";
-import { $, rnd } from "../util";
+import type { Side } from "../../shared/types.js";
+import { $, rnd } from "../util.js";
 
 interface Particle { x: number; y: number; vx: number; vy: number; g?: number; life: number; max: number; size: number; color: string }
 let fx: { cv: HTMLCanvasElement; ctx: CanvasRenderingContext2D; parts: Particle[]; running: boolean; w: number; h: number } | null = null;

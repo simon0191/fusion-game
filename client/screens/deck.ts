@@ -1,8 +1,8 @@
-import type { Tuning } from "../../shared/types";
-import { DEFAULT_TUNING } from "../../shared/tuning";
-import { DECK_MAX, S, resetGame, save } from "../state/store";
-import { closeScreen, openScreen } from "../router";
-import { cardHTML } from "../battle/cards";
+import type { Tuning } from "../../shared/types.js";
+import { DEFAULT_TUNING } from "../../shared/tuning.js";
+import { DECK_MAX, S, resetGame, save } from "../state/store.js";
+import { closeScreen, openScreen } from "../router.js";
+import { cardHTML } from "../battle/cards.js";
 
 type NumKey = { [K in keyof Tuning]: Tuning[K] extends number ? K : never }[keyof Tuning];
 const FIELDS: [NumKey, string, number, number, number, (v: number) => string][] = [

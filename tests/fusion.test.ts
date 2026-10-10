@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { fuse } from "../shared/fusion/roll";
-import { FusionText, FuseRequest } from "../shared/fusion/schema";
-import { STARTERS, makeCard } from "../shared/data/cards";
-import { ABILITIES } from "../shared/data/abilities";
-import { DEFAULT_TUNING } from "../shared/tuning";
-import { mulberry32 } from "../shared/rng";
+import { fuse } from "../shared/fusion/roll.js";
+import { FusionText, FuseRequest } from "../shared/fusion/schema.js";
+import { STARTERS, makeCard } from "../shared/data/cards.js";
+import { ABILITIES } from "../shared/data/abilities.js";
+import { DEFAULT_TUNING } from "../shared/tuning.js";
+import { mulberry32 } from "../shared/rng.js";
 
 describe("fusion roll", () => {
   it("keeps abilities inside their limits and stats positive", () => {

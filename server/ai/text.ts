@@ -1,5 +1,5 @@
-import type { FuseRequest } from "../../shared/fusion/schema";
-import { mockFusionText } from "../../shared/fusion/mockText";
+import type { FuseRequest } from "../../shared/fusion/schema.js";
+import { mockFusionText } from "../../shared/fusion/mockText.js";
 
 /**
  * Name and flavor text for a fused monster. Mocked for now; the Claude call goes here.

@@ -1,5 +1,5 @@
-import type { Element, FusionOutcome, Rng } from "../types";
-import { pickOne } from "../rng";
+import type { Element, FusionOutcome, Rng } from "../types.js";
+import { pickOne } from "../rng.js";
 
 interface Parent { name: string; els: Element[] }
 

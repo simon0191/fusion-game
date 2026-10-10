@@ -1,7 +1,7 @@
-import type { Card, Opponent, Rng, Side, TimingGrade, Tuning } from "../types";
-import { POOL, makeCard } from "../data/cards";
-import { elementMultiplier } from "../data/elements";
-import { between } from "../rng";
+import type { Card, Opponent, Rng, Side, TimingGrade, Tuning } from "../types.js";
+import { POOL, makeCard } from "../data/cards.js";
+import { elementMultiplier } from "../data/elements.js";
+import { between } from "../rng.js";
 
 export interface Fighter extends Card { hp: number }
 

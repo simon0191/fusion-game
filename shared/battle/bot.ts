@@ -1,7 +1,7 @@
-import type { Card, Rng, TimingGrade, Tuning } from "../types";
-import { elementMultiplier } from "../data/elements";
-import { type BattleState, attackOrder, choosePick, createBattle, enemyPick, finishTurn, resolveAttack } from "./engine";
-import type { Opponent } from "../types";
+import type { Card, Rng, TimingGrade, Tuning } from "../types.js";
+import { elementMultiplier } from "../data/elements.js";
+import { type BattleState, attackOrder, choosePick, createBattle, enemyPick, finishTurn, resolveAttack } from "./engine.js";
+import type { Opponent } from "../types.js";
 
 /** Odds of each tap grade for a simulated player. */
 export interface TapSkill { perfect: number; good: number }

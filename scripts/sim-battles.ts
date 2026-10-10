@@ -1,10 +1,10 @@
 // Headless balance check: npm run sim [-- battlesPerCell]
-import { OPPONENTS, POOL, STARTERS, makeCard } from "../shared/data/cards";
-import { SKILL, simulateBattle, type TapSkill } from "../shared/battle/bot";
-import { fuse } from "../shared/fusion/roll";
-import { DEFAULT_TUNING } from "../shared/tuning";
-import { mulberry32 } from "../shared/rng";
-import type { Card } from "../shared/types";
+import { OPPONENTS, POOL, STARTERS, makeCard } from "../shared/data/cards.js";
+import { SKILL, simulateBattle, type TapSkill } from "../shared/battle/bot.js";
+import { fuse } from "../shared/fusion/roll.js";
+import { DEFAULT_TUNING } from "../shared/tuning.js";
+import { mulberry32 } from "../shared/rng.js";
+import type { Card } from "../shared/types.js";
 
 const N = Number(process.argv[2]) || 400;
 const T = { ...DEFAULT_TUNING, alwaysWin: false };

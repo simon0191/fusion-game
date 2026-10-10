@@ -1,5 +1,5 @@
-import type { Card, CardTemplate, Opponent } from "../types";
-import { newId } from "../rng";
+import type { Card, CardTemplate, Opponent } from "../types.js";
+import { newId } from "../rng.js";
 
 export const STARTERS: CardTemplate[] = [
   { name: "Emberpup", el: "fire", hp: 26, atk: 15, spd: 6, ab: ["burn", 3], look: { h1: 18, h2: 350, body: 0, eyes: 2, eyeSize: 7, horns: 0, tail: 1, mouth: 1 }, flavor: "Sneezes sparks when it is happy." },

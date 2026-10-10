@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { elementMultiplier } from "../shared/data/elements";
-import { STARTERS, OPPONENTS, makeCard } from "../shared/data/cards";
-import { createBattle, enemyPick, choosePick, resolveAttack, finishTurn, attackOrder } from "../shared/battle/engine";
-import { simulateBattle, SKILL } from "../shared/battle/bot";
-import { DEFAULT_TUNING } from "../shared/tuning";
-import { mulberry32 } from "../shared/rng";
+import { elementMultiplier } from "../shared/data/elements.js";
+import { STARTERS, OPPONENTS, makeCard } from "../shared/data/cards.js";
+import { createBattle, enemyPick, choosePick, resolveAttack, finishTurn, attackOrder } from "../shared/battle/engine.js";
+import { simulateBattle, SKILL } from "../shared/battle/bot.js";
+import { DEFAULT_TUNING } from "../shared/tuning.js";
+import { mulberry32 } from "../shared/rng.js";
 
 const T = { ...DEFAULT_TUNING, alwaysWin: false };
 const party = () => STARTERS.slice(0, 3).map(t => makeCard(t));

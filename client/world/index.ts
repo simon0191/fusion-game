@@ -1,12 +1,12 @@
 import { type Group, MathUtils, type MeshBasicMaterial, PerspectiveCamera, Raycaster, Vector2, Vector3, WebGLRenderer } from "three";
-import { OPPONENTS } from "../../shared/data/cards";
-import type { Opponent } from "../../shared/types";
-import { S } from "../state/store";
-import type { WorldHandle } from "../router";
-import { $, esc } from "../util";
-import { buildScene } from "./scene";
-import { makeCharacter, makePlatform, makeTapMarker } from "./actors";
-import { BOUNDS, NPC_SPOTS, PLAYER_START } from "./layout";
+import { OPPONENTS } from "../../shared/data/cards.js";
+import type { Opponent } from "../../shared/types.js";
+import { S } from "../state/store.js";
+import type { WorldHandle } from "../router.js";
+import { $, esc } from "../util.js";
+import { buildScene } from "./scene.js";
+import { makeCharacter, makePlatform, makeTapMarker } from "./actors.js";
+import { BOUNDS, NPC_SPOTS, PLAYER_START } from "./layout.js";
 
 const WALK_SPEED = 5;
 const TALK_RANGE = 2.6;

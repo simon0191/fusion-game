@@ -1,4 +1,4 @@
-import type { Rng } from "./types";
+import type { Rng } from "./types.js";
 
 /** Seeded generator for tests and the balance simulator. */
 export function mulberry32(seed: number): Rng {

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { Element, FusionOutcome } from "../types";
+import type { Element, FusionOutcome } from "../types.js";
 
 const ELEMENT_IDS = ["fire", "water", "leaf", "rock", "spark", "shadow"] as const satisfies readonly Element[];
 const OUTCOMES = ["crit", "normal", "botch"] as const satisfies readonly FusionOutcome[];

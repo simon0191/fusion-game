@@ -1,4 +1,4 @@
-import type { Element } from "../types";
+import type { Element } from "../types.js";
 
 export const ELEMENTS: Record<Element, { color: string; beats: Element[] }> = {
   fire: { color: "#f0612f", beats: ["leaf"] },

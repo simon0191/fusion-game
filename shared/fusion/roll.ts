@@ -1,7 +1,7 @@
-import type { Ability, Card, FusionOutcome, Rng, Tuning } from "../types";
-import { ABILITIES, clampAbility } from "../data/abilities";
-import { newId, pickOne } from "../rng";
-import { mockFusionText } from "./mockText";
+import type { Ability, Card, FusionOutcome, Rng, Tuning } from "../types.js";
+import { ABILITIES, clampAbility } from "../data/abilities.js";
+import { newId, pickOne } from "../rng.js";
+import { mockFusionText } from "./mockText.js";
 
 export interface FusionResult {
   child: Card;

@@ -1,11 +1,11 @@
 import "./styles/main.css";
-import { createWorld } from "./world";
-import { closeScreen, setWorld } from "./router";
-import { startBattle } from "./battle/view";
-import { showDeck } from "./screens/deck";
-import { $ } from "./util";
-import { S } from "./state/store";
-import { OPPONENTS } from "../shared/data/cards";
+import { createWorld } from "./world/index.js";
+import { closeScreen, setWorld } from "./router.js";
+import { startBattle } from "./battle/view.js";
+import { showDeck } from "./screens/deck.js";
+import { $ } from "./util.js";
+import { S } from "./state/store.js";
+import { OPPONENTS } from "../shared/data/cards.js";
 
 const world = createWorld($("#world")!, { onChallenge: startBattle, onOpenDeck: showDeck });
 setWorld(world);

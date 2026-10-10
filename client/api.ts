@@ -1,6 +1,6 @@
-import type { Card, FusionOutcome } from "../shared/types";
-import { FusionText } from "../shared/fusion/schema";
-import { mockFusionText } from "../shared/fusion/mockText";
+import type { Card, FusionOutcome } from "../shared/types.js";
+import { FusionText } from "../shared/fusion/schema.js";
+import { mockFusionText } from "../shared/fusion/mockText.js";
 
 /**
  * Asks the server for the fused monster's name and flavor text. Falls back to the local mock

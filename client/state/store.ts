@@ -1,6 +1,6 @@
-import type { Card, Tuning } from "../../shared/types";
-import { STARTERS, makeCard } from "../../shared/data/cards";
-import { DEFAULT_TUNING } from "../../shared/tuning";
+import type { Card, Tuning } from "../../shared/types.js";
+import { STARTERS, makeCard } from "../../shared/data/cards.js";
+import { DEFAULT_TUNING } from "../../shared/tuning.js";
 
 export interface Stats { battles: number; wins: number; turns: number[]; crit: number; normal: number; botch: number; perfect: number; good: number; miss: number }
 export interface GameState {

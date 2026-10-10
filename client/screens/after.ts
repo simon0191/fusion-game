@@ -1,11 +1,11 @@
-import type { Card, Opponent } from "../../shared/types";
-import { POOL, makeCard } from "../../shared/data/cards";
-import { fuse } from "../../shared/fusion/roll";
-import { DECK_MAX, S, byId, save } from "../state/store";
-import { closeScreen, openScreen } from "../router";
-import { cardHTML } from "../battle/cards";
-import { fusionText } from "../api";
-import { esc } from "../util";
+import type { Card, Opponent } from "../../shared/types.js";
+import { POOL, makeCard } from "../../shared/data/cards.js";
+import { fuse } from "../../shared/fusion/roll.js";
+import { DECK_MAX, S, byId, save } from "../state/store.js";
+import { closeScreen, openScreen } from "../router.js";
+import { cardHTML } from "../battle/cards.js";
+import { fusionText } from "../api.js";
+import { esc } from "../util.js";
 
 export function showLost(opp: Opponent, turns: number) {
   const o = openScreen(`<div class="screen center">

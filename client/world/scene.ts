@@ -2,8 +2,8 @@ import {
   AmbientLight, CatmullRomCurve3, Color, ConeGeometry, CylinderGeometry, DirectionalLight, DodecahedronGeometry, Fog,
   HemisphereLight, InstancedMesh, Mesh, MeshLambertMaterial, Object3D, PlaneGeometry, Scene, TubeGeometry, Vector3,
 } from "three";
-import { mulberry32 } from "../../shared/rng";
-import { BOUNDS, NPC_SPOTS, PATH, PLAYER_START, distToPath } from "./layout";
+import { mulberry32 } from "../../shared/rng.js";
+import { BOUNDS, NPC_SPOTS, PATH, PLAYER_START, distToPath } from "./layout.js";
 
 export interface Obstacle { x: number; z: number; r: number }
 

@@ -1,4 +1,4 @@
-import type { Ability, AbilityType } from "../types";
+import type { Ability, AbilityType } from "../types.js";
 
 export const ABILITIES: Record<AbilityType, { name: string; describe: (v: number) => string; hasValue: boolean; max: number }> = {
   burn: { name: "Burn", describe: v => `Hits deal +${v} damage.`, hasValue: true, max: 12 },

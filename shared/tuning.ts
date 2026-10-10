@@ -1,4 +1,4 @@
-import type { Tuning } from "./types";
+import type { Tuning } from "./types.js";
 
 export const DEFAULT_TUNING: Tuning = {
   alwaysWin: true,

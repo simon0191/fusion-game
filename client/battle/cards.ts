@@ -1,8 +1,8 @@
-import type { Card, Element, Look } from "../../shared/types";
-import { ELEMENTS } from "../../shared/data/elements";
-import { ABILITIES } from "../../shared/data/abilities";
-import type { Fighter } from "../../shared/battle/engine";
-import { esc } from "../util";
+import type { Card, Element, Look } from "../../shared/types.js";
+import { ELEMENTS } from "../../shared/data/elements.js";
+import { ABILITIES } from "../../shared/data/abilities.js";
+import type { Fighter } from "../../shared/battle/engine.js";
+import { esc } from "../util.js";
 
 let svgUid = 1;
 
