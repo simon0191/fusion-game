@@ -54,6 +54,8 @@ export interface Tuning {
   /** Timing taps: extra damage on your attacks, in percent. */
   tapPerfectBonus: number;
   tapGoodBonus: number;
+  /** Timing taps: damage lost on a missed attack tap, in percent. */
+  tapMissPenalty: number;
   /** Timing taps: share of incoming damage blocked, in percent. */
   blockPerfect: number;
   blockGood: number;

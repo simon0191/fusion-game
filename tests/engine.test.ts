@@ -36,12 +36,29 @@ describe("timing taps", () => {
   it("a perfect tap hits harder than a miss", () => {
     expect(avgDamage("mine", "perfect")).toBeGreaterThan(avgDamage("mine", "miss") * 1.3);
   });
+  it("a missed attack tap deals less damage than no timing bonus", () => {
+    const noPenalty = { ...T, tapMissPenalty: 0 };
+    const rng = mulberry32(7);
+    const b = createBattle([makeCard({ ...MONSTERS.quartzgrizz, ab: ["burn", 0] })], OPPONENTS[0], rng);
+    b.myPick = b.mine[0].id;
+    b.theirPick = b.theirs[0].id;
+    const dmg = (tuning: typeof T) => {
+      const hp = b.theirs[0].hp;
+      const hit = resolveAttack(b, "mine", "miss", tuning, mulberry32(1)).find(e => e.kind === "hit");
+      b.theirs[0].hp = hp;
+      return hit && hit.kind === "hit" ? hit.dmg : 0;
+    };
+    expect(dmg(T)).toBeLessThan(dmg(noPenalty));
+  });
   it("a perfect block takes less damage than a miss", () => {
     expect(avgDamage("theirs", "perfect")).toBeLessThan(avgDamage("theirs", "miss") * 0.7);
   });
 });
 
 describe("battle flow", () => {
+  it("default tuning is not in always-win mode", () => {
+    expect(DEFAULT_TUNING.alwaysWin).toBe(false);
+  });
   it("always ends within the turn limit", () => {
     for (let i = 0; i < 200; i++) {
       const b = simulateBattle(party(), OPPONENTS[i % OPPONENTS.length], T, SKILL.casual, mulberry32(i));

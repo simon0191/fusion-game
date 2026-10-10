@@ -21,6 +21,7 @@ export function showSettings() {
     <div class="panel">
       <h2 class="section-title">Battle</h2>
       <div class="seg" role="group" aria-label="Animation speed" style="font-size:13px">Animation speed ${[1, 2, 3].map(s => `<button type="button" data-speed="${s}" aria-pressed="${S.speed === s}">${s}×</button>`).join("")}</div>
+      <label class="toggle"><input type="checkbox" data-set="alwaysWin" ${S.tuning.alwaysWin ? "checked" : ""}> Always win (for demos: enemies deal no damage, your hits knock out, all challengers unlocked)</label>
     </div>
   </div>`);
 
@@ -35,6 +36,7 @@ export function showSettings() {
     const el = e.target as HTMLInputElement;
     if (el.dataset.vol) { save(); if (el.dataset.vol !== "music") sfx("select"); }
     else if (el.dataset.set === "muted") setMuted(el.checked);
+    else if (el.dataset.set === "alwaysWin") { S.tuning.alwaysWin = el.checked; save(); }
     else if (el.dataset.set === "cries") {
       S.audio.cries = el.checked; save();
       if (el.checked && S.deck[0]) cry(S.deck[0]);

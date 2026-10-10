@@ -167,7 +167,7 @@ function onClick(e: MouseEvent) {
   } else if (d.speed) {
     S.speed = Number(d.speed); setSpeed(S.speed); save();
     document.querySelectorAll<HTMLElement>("[data-speed]").forEach(x => x.setAttribute("aria-pressed", String(Number(x.dataset.speed) === S.speed)));
-  } else if (d.winnow !== undefined && !b.over) {
+  } else if (d.winnow !== undefined && S.tuning.alwaysWin && !b.over) {
     const battle = b;
     end(battle, true, "skipped");
     if (pickResolve) { const r = pickResolve; pickResolve = null; r(""); }

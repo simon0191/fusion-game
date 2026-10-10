@@ -17,6 +17,8 @@ export interface GameState {
   speed: number;
   muted: boolean;
   audio: AudioSettings;
+  /** Save format. Saves before version 2 may have "Always win" stuck on from an old default. */
+  version: number;
 }
 
 const KEY = "fusion-game-v2";
@@ -26,7 +28,7 @@ const freshStats = (): Stats => ({ battles: 0, wins: 0, turns: [], crit: 0, norm
 
 export function freshGame(tuning: Tuning = { ...DEFAULT_TUNING }): GameState {
   const deck = randomMonsters(DECK_START, Math.random);
-  return { deck, party: deck.slice(0, TEAM_SIZE).map(c => c.id), beaten: [], stats: freshStats(), tuning, speed: 1, muted: false, audio: { ...DEFAULT_AUDIO } };
+  return { deck, party: deck.slice(0, TEAM_SIZE).map(c => c.id), beaten: [], stats: freshStats(), tuning, speed: 1, muted: false, audio: { ...DEFAULT_AUDIO }, version: 2 };
 }
 
 function load(): GameState {
@@ -34,7 +36,11 @@ function load(): GameState {
     const raw = localStorage.getItem(KEY);
     if (raw) {
       const s = JSON.parse(raw) as GameState;
-      if (Array.isArray(s.deck) && s.deck.length) return { ...freshGame(), ...s, tuning: { ...DEFAULT_TUNING, ...s.tuning }, stats: { ...freshStats(), ...s.stats }, audio: { ...DEFAULT_AUDIO, ...s.audio } };
+      if (Array.isArray(s.deck) && s.deck.length) {
+        const tuning = { ...DEFAULT_TUNING, ...s.tuning };
+        if (!(s.version >= 2)) tuning.alwaysWin = false;
+        return { ...freshGame(), ...s, tuning, stats: { ...freshStats(), ...s.stats }, audio: { ...DEFAULT_AUDIO, ...s.audio }, version: 2 };
+      }
     }
   } catch { /* storage blocked or corrupt: start fresh */ }
   return freshGame();

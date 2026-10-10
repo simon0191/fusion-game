@@ -18,7 +18,7 @@ export function teamHTML(b: BattleState, side: "mine" | "theirs", pickable: bool
 
 function bar(b: BattleState) {
   return `<div class="bbar">
-    <div class="row1"><div class="score" id="score">${scoreHTML(b)}</div><button type="button" class="winnow" data-winnow>Win now</button></div>
+    <div class="row1"><div class="score" id="score">${scoreHTML(b)}</div>${S.tuning.alwaysWin ? `<button type="button" class="winnow" data-winnow>Win now</button>` : ""}</div>
     <div class="row2">
       <div class="seg" role="group" aria-label="Animation speed">Speed ${[1, 2, 3].map(s => `<button type="button" data-speed="${s}" aria-pressed="${S.speed === s}">${s}×</button>`).join("")}</div>
       <div class="seg">${muteButtonHTML("")}</div>

@@ -13,6 +13,7 @@ const FIELDS: [NumKey, string, number, number, number, (v: number) => string][] 
   ["kosToWin", "Knockouts needed to win", 1, 3, 1, v => String(v)],
   ["tapPerfectBonus", "Perfect tap: extra damage", 0, 100, 5, v => "+" + v + "%"],
   ["tapGoodBonus", "Good tap: extra damage", 0, 60, 5, v => "+" + v + "%"],
+  ["tapMissPenalty", "Missed tap: damage lost", 0, 80, 5, v => "-" + v + "%"],
   ["blockPerfect", "Perfect block: damage blocked", 0, 90, 5, v => v + "%"],
   ["blockGood", "Good block: damage blocked", 0, 60, 5, v => v + "%"],
   ["mutMin", "Fusion stat roll, worst", -60, 0, 5, v => v + "%"],
@@ -51,7 +52,6 @@ export function showDeck() {
     </div>
     <details class="panel">
       <summary>Tuning</summary>
-      <label class="toggle"><input type="checkbox" data-toggle="alwaysWin" ${S.tuning.alwaysWin ? "checked" : ""}> Always win (enemies deal no damage, your hits knock out, all challengers unlocked)</label>
       <div class="tune">${FIELDS.map(([k, label, min, max, step, fmt]) =>
         `<label for="t-${k}">${label}<output id="o-${k}">${fmt(S.tuning[k])}</output><input id="t-${k}" type="range" min="${min}" max="${max}" step="${step}" value="${S.tuning[k]}" data-tune="${k}"></label>`).join("")}</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -84,7 +84,7 @@ export function showDeck() {
       else { if (S.party.length >= 3) S.party.shift(); S.party.push(d.party); }
       save(); keepOpen();
     } else if (d.close !== undefined) closeScreen();
-    else if (d.defaults !== undefined) { S.tuning = { ...DEFAULT_TUNING }; save(); keepOpen(); }
+    else if (d.defaults !== undefined) { S.tuning = { ...DEFAULT_TUNING, alwaysWin: S.tuning.alwaysWin }; save(); keepOpen(); }
     else if (d.reset !== undefined) { resetGame(); keepOpen(); }
   };
   o.oninput = e => {
@@ -94,10 +94,6 @@ export function showDeck() {
     if (k === "mutMin" && S.tuning.mutMin > S.tuning.mutMax) S.tuning.mutMax = S.tuning.mutMin;
     o.querySelector(`#o-${k}`)!.textContent = FIELDS.find(f => f[0] === k)![5](S.tuning[k]);
     save();
-  };
-  o.onchange = e => {
-    const el = e.target as HTMLInputElement;
-    if (el.dataset.toggle === "alwaysWin") { S.tuning.alwaysWin = el.checked; save(); }
   };
 }
 
