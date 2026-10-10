@@ -1,0 +1,30 @@
+{
+  "name": "fusion-game",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k -n web,api -c yellow,cyan \"vite\" \"tsx watch server/dev.ts\"",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "sim": "tsx scripts/sim-battles.ts"
+  },
+  "dependencies": {
+    "hono": "4.13.9",
+    "three": "0.186.1",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@hono/node-server": "2.1.1",
+    "@types/node": "24.19.0",
+    "@types/three": "0.186.0",
+    "concurrently": "10.0.5",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2",
+    "vite": "8.3.1",
+    "vitest": "5.0.2"
+  },
+  "engines": { "node": ">=22" }
+}
