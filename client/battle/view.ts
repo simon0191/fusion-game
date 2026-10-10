@@ -93,7 +93,7 @@ function finish(battle: BattleState) {
   if (battle.result === "win" && !S.beaten.includes(battle.opp.id)) S.beaten.push(battle.opp.id);
   save();
   b = null;
-  if (battle.result === "win") showReward(battle.opp, battle.turn);
+  if (battle.result === "win") showReward(battle.opp, battle.turn, battle.theirs);
   else showLost(battle.opp, battle.turn);
 }
 

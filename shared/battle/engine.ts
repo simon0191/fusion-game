@@ -1,5 +1,5 @@
 import type { Card, Opponent, Rng, Side, TimingGrade, Tuning } from "../types.js";
-import { POOL, makeCard } from "../data/cards.js";
+import { TEAM_SIZE, randomMonsters } from "../data/cards.js";
 import { elementMultiplier } from "../data/elements.js";
 import { between } from "../rng.js";
 
@@ -26,11 +26,11 @@ export type BattleEvent =
 const toFighter = (c: Card): Fighter => ({ ...c, els: [...c.els], ab: { ...c.ab }, look: { ...c.look }, hp: c.maxHp });
 const other = (s: Side): Side => (s === "mine" ? "theirs" : "mine");
 
-export function createBattle(party: Card[], opp: Opponent): BattleState {
+export function createBattle(party: Card[], opp: Opponent, rng: Rng = Math.random): BattleState {
   return {
     opp,
     mine: party.map(toFighter),
-    theirs: opp.cards.map(k => toFighter(makeCard(POOL[k], opp.mult))),
+    theirs: randomMonsters(TEAM_SIZE, rng, opp.mult).map(toFighter),
     turn: 1,
     myPick: null,
     theirPick: null,

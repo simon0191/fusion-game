@@ -1,5 +1,5 @@
 // Headless balance check: npm run sim [-- battlesPerCell]
-import { OPPONENTS, POOL, STARTERS, makeCard } from "../shared/data/cards.js";
+import { DECK_START, OPPONENTS, TEAM_SIZE, randomMonsters } from "../shared/data/cards.js";
 import { SKILL, simulateBattle, type TapSkill } from "../shared/battle/bot.js";
 import { fuse } from "../shared/fusion/roll.js";
 import { DEFAULT_TUNING } from "../shared/tuning.js";
@@ -10,13 +10,17 @@ const N = Number(process.argv[2]) || 400;
 const T = { ...DEFAULT_TUNING, alwaysWin: false };
 const power = (c: Card) => c.maxHp * c.atk;
 
-console.log(`\n1) Starter party (Emberpup, Tidalnewt, Mossback), no fusions. ${N} battles per cell. Win % / avg turns.\n`);
+/** A new player's party: the bot's best 3 of a random 5-card starting deck. */
+const starterParty = (rng: () => number) => randomMonsters(DECK_START, rng).sort((x, y) => power(y) - power(x)).slice(0, TEAM_SIZE);
+
+console.log(`\n1) Random starting party, no fusions. ${N} battles per cell. Win % / avg turns.\n`);
 console.log("opponent".padEnd(18) + Object.keys(SKILL).map(k => k.padStart(14)).join(""));
 for (const [oi, opp] of OPPONENTS.entries()) {
   const cells = Object.values(SKILL).map((skill, si) => {
     let wins = 0, turns = 0;
     for (let i = 0; i < N; i++) {
-      const b = simulateBattle(STARTERS.slice(0, 3).map(t => makeCard(t)), opp, T, skill, mulberry32(oi * 1e6 + si * 1e4 + i));
+      const rng = mulberry32(oi * 1e6 + si * 1e4 + i);
+      const b = simulateBattle(starterParty(rng), opp, T, skill, rng);
       if (b.result === "win") wins++;
       turns += b.turn;
     }
@@ -28,17 +32,19 @@ for (const [oi, opp] of OPPONENTS.entries()) {
 /** Plays the ladder in order: after each win, take the strongest enemy card and fuse it into the weakest party member. */
 function campaign(skill: TapSkill, seed: number) {
   const rng = mulberry32(seed);
-  let party = STARTERS.slice(0, 3).map(t => makeCard(t));
+  let party = starterParty(rng);
   let losses = 0;
   const lossesAt: number[] = OPPONENTS.map(() => 0);
   for (const [oi, opp] of OPPONENTS.entries()) {
+    let theirs: Card[];
     for (;;) {
       const b = simulateBattle(party, opp, T, skill, rng);
+      theirs = b.theirs;
       if (b.result === "win") break;
       losses++; lossesAt[oi]++;
       if (losses > 40) return { done: false, losses, lossesAt, party };
     }
-    const taken = opp.cards.map(k => makeCard(POOL[k], opp.mult)).sort((x, y) => power(y) - power(x))[0];
+    const taken = [...theirs].sort((x, y) => power(y) - power(x))[0];
     const weakest = [...party].sort((x, y) => power(x) - power(y))[0];
     party = party.map(c => (c === weakest ? fuse(taken, c, T, rng).child : c));
   }

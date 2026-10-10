@@ -1,5 +1,6 @@
 import type { Card, Opponent } from "../../shared/types.js";
-import { POOL, makeCard } from "../../shared/data/cards.js";
+import type { Fighter } from "../../shared/battle/engine.js";
+import { newId } from "../../shared/rng.js";
 import { fuse } from "../../shared/fusion/roll.js";
 import { DECK_MAX, S, byId, save } from "../state/store.js";
 import { closeScreen, openScreen } from "../router.js";
@@ -16,8 +17,9 @@ export function showLost(opp: Opponent, turns: number) {
   o.onclick = e => { if ((e.target as HTMLElement).closest("[data-close]")) closeScreen(); };
 }
 
-export function showReward(opp: Opponent, turns: number) {
-  const cards = opp.cards.map(k => makeCard(POOL[k], opp.mult));
+/** Offers the cards the opponent fought with, at full health. */
+export function showReward(opp: Opponent, turns: number, theirs: Fighter[]) {
+  const cards: Card[] = theirs.map(({ hp: _hp, ...c }) => ({ ...c, id: newId() }));
   const o = openScreen(`<div class="screen center">
     <div class="big-title">You beat ${esc(opp.name)}!</div>
     <p class="hint">The battle took ${turns} turn${turns === 1 ? "" : "s"}. Take one of their cards.</p>

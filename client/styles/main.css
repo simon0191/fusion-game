@@ -61,7 +61,8 @@ button.card { transition: transform .15s; }
 .els { display: flex; gap: 3px; flex-shrink: 0; }
 .chip { font: 600 9px/1 var(--num); text-transform: uppercase; letter-spacing: .06em; padding: 3px 4px; border-radius: 4px; color: #fff; background: var(--c); }
 .card .art { aspect-ratio: 1; border-radius: 8px; background: radial-gradient(circle at 50% 60%, color-mix(in srgb, var(--el) 45%, #fff) 0%, color-mix(in srgb, var(--el) 25%, var(--card)) 70%); display: grid; place-items: center; overflow: hidden; }
-.card .art svg { width: 92%; height: 92%; }
+.card .art :is(svg, .pic) { width: 92%; height: 92%; }
+.pic { display: block; object-fit: contain; filter: drop-shadow(0 3px 3px rgba(0,0,0,.25)); user-select: none; -webkit-user-select: none; }
 .card .st { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
 .card .st div { background: color-mix(in srgb, var(--el) 14%, var(--card)); border-radius: 5px; padding: 3px 5px; display: grid; }
 .card .st b { font: 600 15px/1 var(--num); font-variant-numeric: tabular-nums; }
@@ -105,8 +106,9 @@ button.card { transition: transform .15s; }
 .slot.mine { left: 6%; bottom: 5%; width: min(40cqw, 44cqh); }
 .slot.theirs { right: 8%; top: 15%; width: min(32cqw, 36cqh); }
 .mon { width: 100%; height: 100%; }
-.mon svg { width: 100%; height: 100%; display: block; }
-.slot.theirs .mon svg { transform: scaleX(-1); }
+.mon :is(svg, .pic) { width: 100%; height: 100%; display: block; }
+/* Drawn placeholders face forward and get flipped for the enemy; the art faces left, so your side is flipped instead */
+.slot.theirs .mon svg, .slot.mine .mon .pic { transform: scaleX(-1); }
 .plate { position: absolute; width: 46%; background: rgba(14,27,34,.85); border-radius: 8px; padding: 5px 7px; display: grid; gap: 4px; z-index: 1; }
 .plate.mine { right: 3%; bottom: 5%; } .plate.theirs { left: 3%; top: 4%; }
 .plate .pn { font: 400 14px/1 var(--display); display: flex; justify-content: space-between; gap: 6px; overflow-wrap: anywhere; }
@@ -127,7 +129,7 @@ button.card { transition: transform .15s; }
 /* One monster in battle */
 .team { display: flex; gap: 6px; min-width: 0; }
 .mchip { --el: #888; position: relative; min-width: 0; background: var(--card); color: var(--card-ink); border: 3px solid var(--el); border-radius: 10px; padding: 4px; text-align: left; display: grid; gap: 3px; transition: transform .15s; }
-.mchip svg { display: block; width: 100%; height: auto; aspect-ratio: 1; background: color-mix(in srgb, var(--el) 22%, var(--card)); border-radius: 6px; }
+.mchip :is(svg, .pic) { display: block; width: 100%; height: auto; aspect-ratio: 1; background: color-mix(in srgb, var(--el) 22%, var(--card)); border-radius: 6px; }
 .mchip .mn { font: 400 12px/1.05 var(--display); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mchip .ms { font: 500 10px/1.2 var(--num); color: var(--card-muted); }
 .mchip.ko { filter: grayscale(1); opacity: .45; }
@@ -138,11 +140,11 @@ button.mchip.pickable { animation: pulse 1.2s ease-in-out infinite; }
 /* Enemy strip on top, your three monsters fanned like a hand of cards at the bottom */
 .battle .team.theirs { flex: none; justify-content: center; }
 .battle .team.theirs .mchip { width: 30%; grid-template-columns: 30px minmax(0, 1fr); column-gap: 5px; align-items: center; padding: 3px 5px; }
-.battle .team.theirs .mchip svg { grid-row: 1 / 3; }
+.battle .team.theirs .mchip :is(svg, .pic) { grid-row: 1 / 3; }
 .battle .team.theirs .ms { display: none; }
 .battle .team.mine { flex: none; justify-content: center; padding: 4px 4px 12px; }
 .battle .team.mine .mchip { width: 31%; max-width: 150px; box-shadow: 0 6px 14px rgba(0,0,0,.4); }
-.battle .team.mine .mchip svg { width: 82%; justify-self: center; }
+.battle .team.mine .mchip :is(svg, .pic) { width: 82%; justify-self: center; }
 .battle .team.mine .mchip:nth-child(1) { transform: rotate(-5deg) translateY(4px); }
 .battle .team.mine .mchip:nth-child(3) { transform: rotate(5deg) translateY(4px); }
 .battle .team.mine .mchip.active { transform: translateY(-8px); }
