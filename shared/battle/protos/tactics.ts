@@ -178,7 +178,7 @@ export function turnOrder(b: TacticsState, rng: Rng): Side[] {
   return mineFirst ? ["mine", "theirs"] : ["theirs", "mine"];
 }
 
-const tapBonus = (t: TimingGrade, T: Tuning) => (t === "perfect" ? T.tapPerfectBonus : t === "good" ? T.tapGoodBonus : 0);
+const tapBonus = (t: TimingGrade, T: Tuning) => (t === "perfect" ? T.tapPerfectBonus : t === "good" ? T.tapGoodBonus : -T.tapMissPenalty);
 const blockShare = (t: TimingGrade, T: Tuning) => (t === "perfect" ? T.blockPerfect : t === "good" ? T.blockGood : 0);
 
 function damage(f: TFighter, side: Side, dmg: number, ev: TEvent[]) {

@@ -69,7 +69,7 @@ function wait(r: Run, ms: number) {
 function shellHTML(r: Run) {
   return `<div class="battle p-hand">
     <div class="bbar">
-      <div class="row1"><div class="score" id="phScore"></div><button type="button" class="winnow" data-winnow>Win now</button></div>
+      <div class="row1"><div class="score" id="phScore"></div>${S.tuning.alwaysWin ? `<button type="button" class="winnow" data-winnow>Win now</button>` : ""}</div>
       <div class="row2">${modeBarHTML()}
         <div class="seg" role="group" aria-label="Animation speed">${[1, 2, 3].map(v => `<button type="button" data-speed="${v}" aria-pressed="${S.speed === v}">${v}×</button>`).join("")}${muteButtonHTML("")}</div>
       </div>
@@ -286,7 +286,7 @@ function onClick(ev: MouseEvent) {
     document.querySelectorAll<HTMLElement>(".p-hand [data-speed]").forEach(x => x.setAttribute("aria-pressed", String(Number(x.dataset.speed) === S.speed)));
     return;
   }
-  if (d.winnow !== undefined) return finishBattle(s.opp, true, s.turn, s.theirs.map(f => f.card), true);
+  if (d.winnow !== undefined && S.tuning.alwaysWin) return finishBattle(s.opp, true, s.turn, s.theirs.map(f => f.card), true);
   if (s.phase !== "player" || r.busy) return;
   if (d.card) {
     const c = s.hand.find(x => String(x.uid) === d.card);

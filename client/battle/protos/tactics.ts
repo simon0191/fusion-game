@@ -261,7 +261,7 @@ function onClick(r: Run, e: MouseEvent) {
     S.speed = Number(d.speed); setSpeed(S.speed); save();
     document.querySelectorAll<HTMLElement>(".p-tactics [data-speed]").forEach(x => x.setAttribute("aria-pressed", String(Number(x.dataset.speed) === S.speed)));
   } else if (d.mode) switchMode(d.mode as BattleMode, b.opp);
-  else if (d.winnow !== undefined && !b.over) finishBattle(b.opp, true, b.turn, b.theirs, true);
+  else if (d.winnow !== undefined && S.tuning.alwaysWin && !b.over) finishBattle(b.opp, true, b.turn, b.theirs, true);
 }
 
 function chooseAct(r: Run, kind: ActionKind) {
@@ -294,7 +294,7 @@ function onKeyDown(r: Run, e: KeyboardEvent) {
 function screenHTML(b: TacticsState) {
   return `<div class="battle p-tactics">
     <div class="bbar">
-      <div class="row1"><div class="score" id="score">${scoreHTML(b)}</div><button type="button" class="winnow" data-winnow>Win now</button></div>
+      <div class="row1"><div class="score" id="score">${scoreHTML(b)}</div>${S.tuning.alwaysWin ? `<button type="button" class="winnow" data-winnow>Win now</button>` : ""}</div>
       <div class="row2"><div class="seg" role="group" aria-label="Animation speed">Speed ${[1, 2, 3].map(s => `<button type="button" data-speed="${s}" aria-pressed="${S.speed === s}">${s}×</button>`).join("")}</div></div>
       <div class="row2">${modeBarHTML()}<div class="seg">${muteButtonHTML("")}</div></div>
     </div>

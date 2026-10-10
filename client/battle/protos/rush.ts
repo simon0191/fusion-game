@@ -202,7 +202,7 @@ function screenHTML(s: RushState) {
     <div class="bbar">
       <div class="row1">
         <div class="score"><span class="r-time" id="rTime">${fmtTime(RUSH.timeLimitMs)}</span><span>Your KOs <b id="rMyKO">0</b>/${T.kosToWin}</span><span>Their KOs <b id="rTheirKO">0</b>/${T.kosToWin}</span></div>
-        <button type="button" class="winnow" data-winnow>Win now</button>
+        ${S.tuning.alwaysWin ? `<button type="button" class="winnow" data-winnow>Win now</button>` : ""}
       </div>
       <div class="row2">${modeBarHTML()}<div class="seg">${muteButtonHTML("")}</div></div>
     </div>
@@ -444,7 +444,7 @@ function onClick(e: MouseEvent) {
   if (!t || !r) return;
   const d = t.dataset;
   if (d.mode) switchMode(d.mode as BattleMode, r.s.opp);
-  else if (d.winnow !== undefined && !r.s.over) {
+  else if (d.winnow !== undefined && S.tuning.alwaysWin && !r.s.over) {
     const { opp } = r.s, secs = seconds(r.s);
     stop();
     finishBattle(opp, true, secs, r.s.theirs.team, true);

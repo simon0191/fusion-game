@@ -52,7 +52,7 @@ export function finishBattle(opp: Opponent, win: boolean, turns: number, theirs:
   save();
   music(null);
   if (win) jingles.victory(); else jingles.defeat();
-  if (win) showReward(opp, turns, theirs.map(toCard).map(c => ({ ...c, hp: c.maxHp })));
+  if (win) showReward(theirs.map(toCard).map(c => ({ ...c, hp: c.maxHp })));
   else showLost(opp, turns);
 }
 
