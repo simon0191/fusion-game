@@ -1,5 +1,8 @@
 import { z } from "zod";
 import { STYLE } from "./style.js";
+import { MONSTERS } from "../../shared/data/cards.js";
+
+const BASE_NAMES = new Set(Object.values(MONSTERS).map(m => m.name));
 import { DEMO_GEMINI_KEY } from "./demo-key.js";
 
 export const geminiKey = () => process.env.GEMINI_API_KEY || DEMO_GEMINI_KEY;
@@ -12,22 +15,26 @@ export const geminiKey = () => process.env.GEMINI_API_KEY || DEMO_GEMINI_KEY;
 export const MODEL = process.env.GEMINI_IMAGE_MODEL || "gemini-3.1-flash-lite-image";
 
 const dataUrl = z.string().max(600_000).regex(/^data:image\/(png|webp|jpeg);base64,[A-Za-z0-9+/=]+$/);
-const parent = z.object({ name: z.string().min(1).max(40), image: dataUrl });
+/** The client sends the base art of every ancestor in the child's ancestry (at most three). */
+const ref = z.object({ name: z.string().refine(n => BASE_NAMES.has(n)), image: dataUrl });
 export const FuseImageRequest = z.object({
-  a: parent,
-  b: parent,
   ancestry: z.record(z.string().max(40), z.number().min(0).max(100)),
   els: z.array(z.string().max(12)).min(1).max(2),
+  refs: z.array(ref).min(1).max(3),
 });
 export type FuseImageRequest = z.infer<typeof FuseImageRequest>;
 
-function prompt(req: FuseImageRequest) {
+/**
+ * DNA (scheme C of X-016): the reference images are the surviving ancestors, largest share first; the share of each
+ * ancestor sets how much of it shows. Ancestors under the cut-off are already gone from the ancestry.
+ */
+export function dnaPrompt(ancestry: Record<string, number>, els: string[]) {
   const words = ["mostly", "with clear features of", "with a slight hint of"];
-  const anc = Object.entries(req.ancestry).sort((x, y) => y[1] - x[1])
-    .map(([k, p], i) => `${words[Math.min(i, 2)]} ${k} (${p}%)`).join(", ");
-  return `Fuse the two creatures in image 1 (${req.a.name}) and image 2 (${req.b.name}) into ONE new creature. ` +
-    `Its ancestry is ${anc}: the share of each ancestor sets how much of it shows. Element${req.els.length > 1 ? "s" : ""}: ${req.els.join(" and ")}. ` +
-    `Draw it in exactly the same art style as images 1 and 2. Single creature, full body, centred.\n\n${STYLE}`;
+  const parts = Object.entries(ancestry).sort((x, y) => y[1] - x[1])
+    .map(([k, p], i) => `${words[Math.min(i, 2)]} ${k} (${p}%, image ${i + 1})`);
+  return `Draw ONE creature whose ancestry is ${parts.join(", ")}. The share of each ancestor sets how much of it shows; ` +
+    `blend them into a single new creature rather than gluing parts together. Element${els.length > 1 ? "s" : ""}: ${els.join(" and ")}. ` +
+    `The attached images are these ancestors in the same order; draw it in exactly their art style. Single creature, full body, centred.\n\n${STYLE}`;
 }
 
 const part = (url: string) => {
@@ -37,14 +44,16 @@ const part = (url: string) => {
 
 export async function generateFusionImage(req: FuseImageRequest): Promise<{ image: string; seconds: number; model: string } | null> {
   const key = geminiKey();
-  if (!key) return null;
+  const order = Object.entries(req.ancestry).sort((x, y) => y[1] - x[1]).map(([k]) => k);
+  const byName = new Map(req.refs.map(r => [r.name, r.image]));
+  if (!key || !order.length || order.some(n => !byName.has(n))) return null;
   const started = Date.now();
   const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`, {
     method: "POST",
     headers: { "content-type": "application/json", "x-goog-api-key": key },
     signal: AbortSignal.timeout(30000),
     body: JSON.stringify({
-      contents: [{ parts: [part(req.a.image), part(req.b.image), { text: prompt(req) }] }],
+      contents: [{ parts: [...order.map(n => part(byName.get(n)!)), { text: dnaPrompt(req.ancestry, req.els) }] }],
       generationConfig: { responseModalities: ["IMAGE"], imageConfig: { aspectRatio: "1:1" } },
     }),
   }).catch(() => null);
