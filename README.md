@@ -18,6 +18,8 @@ Vite listens on your network too, so you can open the game on a phone on the sam
 
 Controls: drag anywhere on the world for a thumb stick (WASD or arrows on desktop).
 
+The battle screen also has a mechanic switch for trialling battle rules: Classic (the original), Tactics (secret move choice with energy), Rush (real time with charge and block) and Hand (action cards with visible enemy intents). Each prototype keeps its rules engine in `shared/battle/protos/`, its screen in `client/battle/protos/`, and has a balance script: `npx tsx scripts/sim-tactics.ts`, `sim-rush.ts`, `sim-hand.ts`. Turn "Always win" off in the deck screen to feel the real difficulty.
+
 In dev builds the browser console has `__fusion.battle("vex")` to jump into a fight, plus `__fusion.state` and `__fusion.world()` for inspecting the game, and `__fusion.warp(x, z)` to move the player (the champion stands at 0, -15).
 
 ## Layout
