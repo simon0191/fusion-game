@@ -1,10 +1,13 @@
 import type { Tuning } from "../../shared/types.js";
 import { DEFAULT_TUNING } from "../../shared/tuning.js";
-import { DECK_MAX, S, resetGame, save } from "../state/store.js";
+import { DECK_MAX, S, resetGame, save, type BattleMode } from "../state/store.js";
 import { closeScreen, openScreen } from "../router.js";
 import { cardHTML } from "../battle/cards.js";
 import { duckMusic } from "../audio/music.js";
 import { allSamples, allSounds, cry, jingles, sample, sfx, type SampleName, type SoundName } from "../audio/sfx.js";
+import { MODE_NAMES } from "../battle/modes.js";
+
+const MENU_MODES: BattleMode[] = ["classic", "tactics", "rush"];
 
 type NumKey = { [K in keyof Tuning]: Tuning[K] extends number ? K : never }[keyof Tuning];
 const FIELDS: [NumKey, string, number, number, number, (v: number) => string][] = [
@@ -35,6 +38,11 @@ export function showDeck() {
       const pi = S.party.indexOf(c.id);
       return cardHTML(c, { tag: "button", attrs: `type="button" data-party="${c.id}"`, selected: pi >= 0, badge: pi >= 0 ? `Party ${pi + 1}` : "" });
     }).join("")}</div>
+    <div class="panel">
+      <h2 class="section-title">Battle mode</h2>
+      <div class="seg" role="group" aria-label="Battle mode">${MENU_MODES.map(m => `<button type="button" data-mode="${m}" aria-pressed="${S.battleMode === m}">${MODE_NAMES[m]}</button>`).join("")}</div>
+      <span class="hint">Used for your next battle.</span>
+    </div>
     <div class="panel">
       <h2 class="section-title">Playtest stats</h2>
       <div class="statgrid">
@@ -83,7 +91,8 @@ export function showDeck() {
       if (i >= 0) S.party.splice(i, 1);
       else { if (S.party.length >= 3) S.party.shift(); S.party.push(d.party); }
       save(); keepOpen();
-    } else if (d.close !== undefined) closeScreen();
+    } else if (d.mode) { S.battleMode = d.mode as BattleMode; save(); keepOpen(); }
+    else if (d.close !== undefined) closeScreen();
     else if (d.defaults !== undefined) { S.tuning = { ...DEFAULT_TUNING, alwaysWin: S.tuning.alwaysWin }; save(); keepOpen(); }
     else if (d.reset !== undefined) { resetGame(); keepOpen(); }
   };
