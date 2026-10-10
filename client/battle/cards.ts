@@ -60,7 +60,22 @@ export function monsterSVG(g: Look) {
 
 /** The monster picture: its art if it has some, otherwise the drawn placeholder. */
 export const monsterArt = (c: Pick<Card, "art" | "look">) =>
-  c.art ? `<img class="pic" src="${esc(c.art)}" alt="" draggable="false">` : monsterSVG(c.look);
+  c.art ? `<img class="pic" src="${esc(artURL(c.art))}" alt="" draggable="false">` : monsterSVG(c.look);
+
+/** Fused art is kept as a data URL; turn it into one blob URL per picture so re-rendered cards reuse the decoded image. */
+const blobs = new Map<string, string>();
+function artURL(art: string) {
+  if (!art.startsWith("data:")) return art;
+  let url = blobs.get(art);
+  if (!url) {
+    const [head, b64] = art.split(",");
+    const bin = atob(b64), bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    url = URL.createObjectURL(new Blob([bytes], { type: head.slice(5, head.indexOf(";")) }));
+    blobs.set(art, url);
+  }
+  return url;
+}
 
 const chips = (els: Element[]) => `<span class="els">${els.map(e => `<span class="chip" style="--c:${ELEMENTS[e].color}">${e}</span>`).join("")}</span>`;
 const elColor = (c: Card) => ELEMENTS[c.els[0]].color;

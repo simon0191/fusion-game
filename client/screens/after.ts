@@ -7,6 +7,7 @@ import { closeScreen, openScreen } from "../router.js";
 import { cardHTML } from "../battle/cards.js";
 import { fusionImage, fusionText } from "../api.js";
 import { esc } from "../util.js";
+import { ELEMENTS } from "../../shared/data/elements.js";
 
 export function showLost(opp: Opponent, turns: number) {
   const o = openScreen(`<div class="screen center">
@@ -57,11 +58,18 @@ function showFusionPick(taken: Card, partnerId: string | null) {
   };
 }
 
+/** The waiting stage: both parents' pictures melt into each other inside a ring of their element colours. */
+function meltHTML(a: Card, b: Card) {
+  const pic = (c: Card, cls: string) => (c.art ? `<img class="${cls}" src="${esc(c.art)}" alt="">` : "");
+  return `<div class="melt" style="--ca:${ELEMENTS[a.els[0]].color};--cb:${ELEMENTS[b.els[0]].color}">
+    <span class="ring"></span><span class="core"></span>${pic(a, "a")}${pic(b, "b")}<i class="spark"></i><i class="spark"></i><i class="spark"></i><i class="spark"></i></div>`;
+}
+
 async function doFuse(taken: Card, partner: Card) {
   openScreen(`<div class="screen center">
     <div class="big-title">Fusing…</div>
-    <div class="fuse-stage fusing">${cardHTML(taken, { cls: "a" })}<span class="plus">+</span>${cardHTML(partner, { cls: "b" })}<div class="glow"></div><div class="brew"><i></i><i></i><i></i></div></div>
-    <p class="hint brewing">Drawing the new monster<span class="dots"><b>.</b><b>.</b><b>.</b></span></p>
+    <div class="fuse-stage fusing">${cardHTML(taken, { cls: "a" })}<span class="plus">+</span>${cardHTML(partner, { cls: "b" })}<div class="glow"></div>${meltHTML(taken, partner)}</div>
+    <p class="hint">Fusing the monsters<span class="dots"><b>.</b><b>.</b><b>.</b></span></p>
   </div>`);
   const res = fuse(taken, partner, S.tuning);
   const [text, img] = await Promise.all([fusionText(taken, partner, res.outcome), fusionImage(res.child, taken, partner), new Promise(r => setTimeout(r, 2000))]);
@@ -73,6 +81,7 @@ async function doFuse(taken: Card, partner: Card) {
   save();
   const d = (v: number, base: number) => { const pct = Math.round((v / base - 1) * 100); return `<span class="${pct >= 0 ? "up" : "down"}">${pct >= 0 ? "+" : ""}${pct}%</span>`; };
   const o = openScreen(`<div class="screen center">
+    <div class="flash"></div>
     <div class="outcome ${res.outcome}">${res.outcome === "crit" ? "Critical fusion!" : res.outcome === "botch" ? "Botched fusion…" : "Fusion complete"}</div>
     <div class="reveal" style="width:220px;max-width:100%">${cardHTML(c)}</div>
     <div class="deltas"><span>HP ${c.maxHp} ${d(c.maxHp, res.base.hp)}</span><span>ATK ${c.atk} ${d(c.atk, res.base.atk)}</span><span>SPD ${c.spd} ${d(c.spd, res.base.spd)}</span></div>
