@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0e1b22">
+  <title>Fusion Battler</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Rubik:wght@400;500;700&family=Chakra+Petch:wght@500;600&display=swap">
+</head>
+<body>
+  <div id="world"></div>
+  <div id="labels" aria-hidden="true"></div>
+  <header class="hud">
+    <div>
+      <div class="proto">Prototype · placeholder art and world, names are mocked, no AI calls</div>
+      <div class="hud-row"><h1>Fusion Battler</h1><span id="progress" class="hint"></span></div>
+    </div>
+    <button class="btn" type="button" data-open="deck">Deck</button>
+  </header>
+  <div id="interact" class="interact" hidden></div>
+  <div id="overlay" class="overlay" hidden></div>
+  <script type="module" src="./main.ts"></script>
+</body>
+</html>
