@@ -1,7 +1,7 @@
 import type { BattleState, Fighter } from "../../shared/battle/engine.js";
 import { fighter, koCount } from "../../shared/battle/engine.js";
 import { S } from "../state/store.js";
-import { chipHTML, hpClass, monsterSVG } from "./cards.js";
+import { chipHTML, hpClass, monsterArt } from "./cards.js";
 import { esc } from "../util.js";
 
 export function scoreHTML(b: BattleState) {
@@ -29,8 +29,8 @@ function arena(b: BattleState) {
   return `<div class="arena" id="arena">
     ${tp ? `<div class="plate theirs">${plateInner(tp)}</div>` : ""}
     ${mp ? `<div class="plate mine">${plateInner(mp)}</div>` : ""}
-    <div class="slot theirs">${tp ? `<div class="mon" id="monTheirs">${monsterSVG(tp.look)}</div>` : ""}</div>
-    <div class="slot mine">${mp ? `<div class="mon" id="monMine">${monsterSVG(mp.look)}</div>` : ""}</div>
+    <div class="slot theirs">${tp ? `<div class="mon" id="monTheirs">${monsterArt(tp)}</div>` : ""}</div>
+    <div class="slot mine">${mp ? `<div class="mon" id="monMine">${monsterArt(mp)}</div>` : ""}</div>
     <canvas id="fx"></canvas>
   </div>`;
 }

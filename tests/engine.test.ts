@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { elementMultiplier } from "../shared/data/elements.js";
-import { STARTERS, OPPONENTS, makeCard } from "../shared/data/cards.js";
+import { MONSTERS, OPPONENTS, TEAM_SIZE, makeCard } from "../shared/data/cards.js";
 import { createBattle, enemyPick, choosePick, resolveAttack, finishTurn, attackOrder } from "../shared/battle/engine.js";
 import { simulateBattle, SKILL } from "../shared/battle/bot.js";
 import { DEFAULT_TUNING } from "../shared/tuning.js";
 import { mulberry32 } from "../shared/rng.js";
 
 const T = { ...DEFAULT_TUNING, alwaysWin: false };
-const party = () => STARTERS.slice(0, 3).map(t => makeCard(t));
+const party = () => ["gryffup", "rimescale", "lanternip"].map(k => makeCard(MONSTERS[k]));
 
 describe("elements", () => {
   it("water beats fire, fire is weak to water", () => {
@@ -25,7 +25,7 @@ describe("timing taps", () => {
     let total = 0;
     for (let i = 0; i < 300; i++) {
       const rng = mulberry32(i);
-      const b = createBattle([makeCard({ ...STARTERS[2], ab: ["burn", 0] })], OPPONENTS[0]);
+      const b = createBattle([makeCard({ ...MONSTERS.quartzgrizz, ab: ["burn", 0] })], OPPONENTS[0], rng);
       b.myPick = b.mine[0].id;
       b.theirPick = b.theirs[0].id;
       const hit = resolveAttack(b, from, timing, T, rng).find(e => e.kind === "hit");
@@ -52,7 +52,7 @@ describe("battle flow", () => {
   it("always win: enemies deal no damage and every hit knocks out", () => {
     const AW = { ...T, alwaysWin: true };
     const rng = mulberry32(1);
-    const b = createBattle(party(), OPPONENTS[4]);
+    const b = createBattle(party(), OPPONENTS[4], rng);
     enemyPick(b, rng);
     choosePick(b, b.mine[0].id);
     for (const side of attackOrder(b, rng)) resolveAttack(b, side, "miss", AW, rng);
@@ -60,6 +60,19 @@ describe("battle flow", () => {
     expect(b.theirs.find(f => f.id === b.theirPick)!.hp).toBe(0);
     finishTurn(b, AW);
     expect(b.over).toBe(false);
+  });
+  it("opponents field different base monsters, scaled by their multiplier", () => {
+    const vex = OPPONENTS[4];
+    for (let i = 0; i < 50; i++) {
+      const b = createBattle(party(), vex, mulberry32(i));
+      expect(b.theirs).toHaveLength(TEAM_SIZE);
+      expect(new Set(b.theirs.map(f => f.name)).size).toBe(TEAM_SIZE);
+      for (const f of b.theirs) {
+        const base = Object.values(MONSTERS).find(t => t.name === f.name)!;
+        expect(f.maxHp).toBe(Math.round(base.hp * vex.mult));
+        expect(f.art).toBe(base.art);
+      }
+    }
   });
   it("a knocked-out monster cannot be picked", () => {
     const b = createBattle(party(), OPPONENTS[0]);

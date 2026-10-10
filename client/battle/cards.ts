@@ -57,6 +57,10 @@ export function monsterSVG(g: Look) {
   </svg>`;
 }
 
+/** The monster picture: its art if it has some, otherwise the drawn placeholder. */
+export const monsterArt = (c: Pick<Card, "art" | "look">) =>
+  c.art ? `<img class="pic" src="${esc(c.art)}" alt="" draggable="false">` : monsterSVG(c.look);
+
 const chips = (els: Element[]) => `<span class="els">${els.map(e => `<span class="chip" style="--c:${ELEMENTS[e].color}">${e}</span>`).join("")}</span>`;
 const elColor = (c: Card) => ELEMENTS[c.els[0]].color;
 
@@ -66,7 +70,7 @@ export function cardHTML(c: Card, { tag = "div", attrs = "", selected = false, b
   return `<${tag} class="card${selected ? " selected" : ""}${cls ? " " + cls : ""}" style="--el:${elColor(c)}" ${attrs}>
     ${badge ? `<span class="badge">${esc(badge)}</span>` : ob}
     <div class="nm"><h3>${esc(c.name)}</h3>${chips(c.els)}</div>
-    <div class="art">${monsterSVG(c.look)}</div>
+    <div class="art">${monsterArt(c)}</div>
     <div class="st"><div><b>${c.maxHp}</b><span>HP</span></div><div><b>${c.atk}</b><span>ATK</span></div><div><b>${c.spd}</b><span>SPD</span></div></div>
     <div class="ab"><b>${ab.name}.</b> ${ab.describe(c.ab.v)}</div>
     <div class="fl">${esc(c.flavor)}</div>
@@ -81,7 +85,7 @@ export const miniStats = (f: Fighter) => `${f.hp}/${f.maxHp} HP · ATK ${f.atk} 
 export function chipHTML(f: Fighter, side: string, { pickable = false, active = false } = {}) {
   const tag = pickable ? "button" : "div";
   return `<${tag} class="mchip${f.hp <= 0 ? " ko" : ""}${active ? " active" : ""}${pickable ? " pickable" : ""}" style="--el:${elColor(f)}" ${pickable ? `type="button" data-fight="${f.id}" aria-label="Fight with ${esc(f.name)}"` : ""} data-mini="${side}-${f.id}">
-    ${monsterSVG(f.look)}
+    ${monsterArt(f)}
     <span class="mn">${esc(f.name)}</span>
     <span class="ms">${miniStats(f)}</span>
     <span class="hpbar"><span class="${hpClass(f)}" style="width:${(f.hp / f.maxHp) * 100}%"></span></span>

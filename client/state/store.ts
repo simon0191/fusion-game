@@ -1,5 +1,5 @@
 import type { Card, Tuning } from "../../shared/types.js";
-import { STARTERS, makeCard } from "../../shared/data/cards.js";
+import { DECK_START, TEAM_SIZE, randomMonsters } from "../../shared/data/cards.js";
 import { DEFAULT_TUNING } from "../../shared/tuning.js";
 
 export interface Stats { battles: number; wins: number; turns: number[]; crit: number; normal: number; botch: number; perfect: number; good: number; miss: number }
@@ -13,14 +13,14 @@ export interface GameState {
   speed: number;
 }
 
-const KEY = "fusion-game-v1";
+const KEY = "fusion-game-v2";
 export const DECK_MAX = 8;
 
 const freshStats = (): Stats => ({ battles: 0, wins: 0, turns: [], crit: 0, normal: 0, botch: 0, perfect: 0, good: 0, miss: 0 });
 
 export function freshGame(tuning: Tuning = { ...DEFAULT_TUNING }): GameState {
-  const deck = STARTERS.map(t => makeCard(t));
-  return { deck, party: deck.slice(0, 3).map(c => c.id), beaten: [], stats: freshStats(), tuning, speed: 1 };
+  const deck = randomMonsters(DECK_START, Math.random);
+  return { deck, party: deck.slice(0, TEAM_SIZE).map(c => c.id), beaten: [], stats: freshStats(), tuning, speed: 1 };
 }
 
 function load(): GameState {

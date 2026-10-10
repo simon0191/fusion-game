@@ -26,7 +26,7 @@ export function botPick(b: BattleState): string {
 }
 
 export function simulateBattle(party: Card[], opp: Opponent, T: Tuning, skill: TapSkill, rng: Rng): BattleState {
-  const b = createBattle(party, opp);
+  const b = createBattle(party, opp, rng);
   while (!b.over) {
     enemyPick(b, rng);
     choosePick(b, botPick(b));

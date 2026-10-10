@@ -21,6 +21,8 @@ export interface Card {
   spd: number;
   ab: Ability;
   look: Look;
+  /** Image URL. Cards without one draw `look` instead. */
+  art?: string;
   flavor: string;
   gen: number;
   outcome: FusionOutcome | null;
@@ -28,10 +30,11 @@ export interface Card {
 
 export interface CardTemplate {
   name: string; el: Element; hp: number; atk: number; spd: number;
-  ab: [AbilityType, number]; look: Look; flavor: string;
+  ab: [AbilityType, number]; look: Look; art: string; flavor: string;
 }
 
-export interface Opponent { id: string; name: string; mult: number; cards: string[]; line: string }
+/** A trainer. Their team is drawn at random from the base monsters each battle, with stats scaled by `mult`. */
+export interface Opponent { id: string; name: string; mult: number; line: string }
 
 export interface Tuning {
   alwaysWin: boolean;
