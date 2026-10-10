@@ -14,9 +14,9 @@ npm run sim        # headless balance run, "Always win" off
 npm run typecheck
 ```
 
-Vite listens on your network too, so you can open the game on a phone on the same Wi-Fi.
+Vite listens on your network too, so you can open the game on a phone on the same Wi-Fi. To run a second copy (for example from a worktree), pick other ports: `PORT=5190 API_PORT=8797 npm run dev`.
 
-Controls: drag anywhere on the world for a thumb stick (WASD or arrows on desktop). The battle screen has a Layout A/B/C switch while we choose between three layouts: A Handheld, B Hand of cards, C Side rails.
+Controls: drag anywhere on the world for a thumb stick (WASD or arrows on desktop).
 
 In dev builds the browser console has `__fusion.battle("vex")` to jump into a fight, plus `__fusion.state` and `__fusion.world()` for inspecting the game.
 

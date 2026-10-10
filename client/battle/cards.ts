@@ -77,7 +77,7 @@ export function cardHTML(c: Card, { tag = "div", attrs = "", selected = false, b
 export const hpClass = (f: Fighter) => { const p = f.hp / f.maxHp; return p > 0.5 ? "" : p > 0.25 ? "mid" : "low"; };
 export const miniStats = (f: Fighter) => `${f.hp}/${f.maxHp} HP · ATK ${f.atk} · ${ABILITIES[f.ab.type].name}`;
 
-/** A monster in battle. Every layout uses this markup and styles it differently. */
+/** A monster in battle: a small strip chip for the enemy, a card in your hand for yours. */
 export function chipHTML(f: Fighter, side: string, { pickable = false, active = false } = {}) {
   const tag = pickable ? "button" : "div";
   return `<${tag} class="mchip${f.hp <= 0 ? " ko" : ""}${active ? " active" : ""}${pickable ? " pickable" : ""}" style="--el:${elColor(f)}" ${pickable ? `type="button" data-fight="${f.id}" aria-label="Fight with ${esc(f.name)}"` : ""} data-mini="${side}-${f.id}">

@@ -6,7 +6,7 @@ import { S, partyCards, save } from "../state/store.js";
 import { openScreen } from "../router.js";
 import { $, esc } from "../util.js";
 import { hpClass, miniStats } from "./cards.js";
-import { battleHTML, plateInner, scoreHTML, teamHTML } from "./layouts.js";
+import { battleHTML, plateInner, scoreHTML, teamHTML } from "./markup.js";
 import { animAttack, enterFx, floatText, hitFx, koFx, setSpeed, setupFx, sleep } from "./fx.js";
 import { timingTap } from "./timing.js";
 import { showLost, showReward } from "../screens/after.js";
@@ -102,9 +102,7 @@ function render() {
   if (!b) return;
   const logHTML = $("#blog")?.innerHTML ?? "";
   const promptHTML = $("#prompt")?.innerHTML ?? "";
-  const liveRing = $(".tap");
-  const o = openScreen(battleHTML(b, S.battleLayout, picking, logHTML));
-  if (liveRing) $("#arena")!.appendChild(liveRing);
+  const o = openScreen(battleHTML(b, picking, logHTML));
   o.classList.add("battle-mode");
   o.onclick = onClick;
   say(promptHTML);
@@ -153,9 +151,6 @@ function onClick(e: MouseEvent) {
   } else if (d.speed) {
     S.speed = Number(d.speed); setSpeed(S.speed); save();
     document.querySelectorAll<HTMLElement>("[data-speed]").forEach(x => x.setAttribute("aria-pressed", String(Number(x.dataset.speed) === S.speed)));
-  } else if (d.layout) {
-    S.battleLayout = d.layout as typeof S.battleLayout; save();
-    render();
   } else if (d.winnow !== undefined && !b.over) {
     const battle = b;
     end(battle, true, "skipped");
