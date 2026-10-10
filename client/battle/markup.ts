@@ -4,6 +4,7 @@ import { S } from "../state/store.js";
 import { chipHTML, hpClass, monsterArt } from "./cards.js";
 import { esc } from "../util.js";
 import { muteButtonHTML } from "../audio/engine.js";
+import { elIcons } from "./scout.js";
 
 export function scoreHTML(b: BattleState) {
   return `<span>Turn <b>${b.turn}</b>/${S.tuning.turnLimit}</span><span>Your KOs <b>${koCount(b.theirs)}</b>/${S.tuning.kosToWin}</span><span>Their KOs <b>${koCount(b.mine)}</b>/${S.tuning.kosToWin}</span>`;
@@ -13,7 +14,9 @@ export const plateInner = (f: Fighter) =>
 
 export function teamHTML(b: BattleState, side: "mine" | "theirs", pickable: boolean) {
   const pick = side === "mine" ? b.myPick : b.theirPick;
-  return b[side].map(f => chipHTML(f, side, { pickable: pickable && side === "mine" && f.hp > 0, active: pick === f.id })).join("");
+  return b[side].map(f => side === "theirs"
+    ? chipHTML(f, side, { active: pick === f.id, inspect: true, extra: `<span class="xs">${elIcons(f)}<span title="Attack / Speed">${f.atk}/${f.spd}</span></span>` })
+    : chipHTML(f, side, { pickable: pickable && f.hp > 0, active: pick === f.id })).join("");
 }
 
 function bar(b: BattleState) {
@@ -40,12 +43,13 @@ function arena(b: BattleState) {
 const prompt = `<div class="prompt" id="prompt"></div>`;
 const blog = (logHTML: string) => `<ol class="blog" id="blog">${logHTML}</ol>`;
 
-/** Battle screen: enemy team on top, arena, then your three monsters fanned like a hand of cards. Fits one phone screen. */
+/** Battle screen: enemy team on top (tap one for its full stats), arena, then your three monsters fanned like a hand of cards. Fits one phone screen. */
 export function battleHTML(b: BattleState, pickable: boolean, logHTML: string) {
   return `<div class="battle">${bar(b)}
     <div class="team theirs">${teamHTML(b, "theirs", false)}</div>
     ${arena(b)}${prompt}
     <div class="team mine">${teamHTML(b, "mine", pickable)}</div>
     ${blog(logHTML)}
+    <div id="inspect"></div>
   </div>`;
 }

@@ -20,11 +20,10 @@ export function showLost(opp: Opponent, turns: number) {
 }
 
 /** Offers the cards the opponent fought with, at full health. */
-export function showReward(opp: Opponent, turns: number, theirs: Fighter[]) {
+export function showReward(theirs: Fighter[]) {
   const cards: Card[] = theirs.map(({ hp: _hp, ...c }) => ({ ...c, id: newId() }));
   const o = openScreen(`<div class="screen center">
-    <div class="big-title">You beat ${esc(opp.name)}!</div>
-    <p class="hint">The battle took ${turns} turn${turns === 1 ? "" : "s"}. Take one of their cards.</p>
+    <div class="big-title">Choose your Reward</div>
     <div class="row">${cards.map(c => cardHTML(c, { tag: "button", attrs: `type="button" data-take="${c.id}"` })).join("")}</div>
   </div>`);
   o.onclick = e => {
