@@ -2,7 +2,7 @@
 
 A phone browser game for an AI game jam. Walk around a small 3D world, battle trainers with monster cards, and fuse two cards into a new monster. In the finished game, AI writes each fused monster's name and flavor text and draws its art. Code decides stats, the fusion roll and abilities, and validates everything the AI returns.
 
-Current state: placeholder art and world, mocked names, no AI calls.
+Current state: storybook 3D world ("Sunlit Ruins") with animated trainers, placeholder monster art, mocked names, no AI calls.
 
 ## Run it
 
@@ -18,7 +18,7 @@ Vite listens on your network too, so you can open the game on a phone on the sam
 
 Controls: drag anywhere on the world for a thumb stick (WASD or arrows on desktop).
 
-In dev builds the browser console has `__fusion.battle("vex")` to jump into a fight, plus `__fusion.state` and `__fusion.world()` for inspecting the game.
+In dev builds the browser console has `__fusion.battle("vex")` to jump into a fight, plus `__fusion.state` and `__fusion.world()` for inspecting the game, and `__fusion.warp(x, z)` to move the player (the champion stands at 0, -15).
 
 ## Layout
 

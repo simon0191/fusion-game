@@ -14,6 +14,6 @@ closeScreen();
 document.querySelector("[data-open=deck]")!.addEventListener("click", showDeck);
 
 if (import.meta.env.DEV) {
-  // Console helpers for playtesting: __fusion.battle("vex"), __fusion.state, __fusion.world()
-  Object.assign(window, { __fusion: { state: S, world: world.debug, battle: (id: string) => startBattle(OPPONENTS.find(o => o.id === id)!) } });
+  // Console helpers for playtesting: __fusion.battle("vex"), __fusion.state, __fusion.world(), __fusion.warp(x, z)
+  Object.assign(window, { __fusion: { state: S, world: world.debug, warp: world.warp, battle: (id: string) => startBattle(OPPONENTS.find(o => o.id === id)!) } });
 }
