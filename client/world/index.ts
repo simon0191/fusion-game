@@ -1,19 +1,19 @@
-import { type Group, MathUtils, PerspectiveCamera, Vector3, WebGLRenderer } from "three";
+import { MathUtils, PCFShadowMap, PerspectiveCamera, Vector3, WebGLRenderer } from "three";
 import { OPPONENTS } from "../../shared/data/cards.js";
 import type { Opponent } from "../../shared/types.js";
 import { S } from "../state/store.js";
 import type { WorldHandle } from "../router.js";
 import { $, esc } from "../util.js";
-import { buildScene } from "./scene.js";
-import { makeCharacter, makePlatform } from "./actors.js";
+import { buildEnv } from "./scene.js";
 import { Joystick } from "./joystick.js";
 import { BOUNDS, NPC_SPOTS, PLAYER_START } from "./layout.js";
+import { PLAYER_OUTFIT, makeTrainer, npcOutfit } from "./trainers.js";
 
 const WALK_SPEED = 5;
 const TALK_RANGE = 2.6;
 const BODY_R = 0.45;
 
-interface Npc { opp: Opponent; index: number; group: Group; label: HTMLElement; x: number; z: number; platform: boolean }
+interface Npc { opp: Opponent; index: number; trainer: ReturnType<typeof makeTrainer>; label: HTMLElement; x: number; z: number; platform: boolean }
 
 export interface WorldCallbacks { onChallenge(opp: Opponent): void; onOpenDeck(): void }
 
@@ -21,29 +21,30 @@ export function createWorld(container: HTMLElement, cb: WorldCallbacks): WorldHa
   const dpr = Math.min(devicePixelRatio || 1, 2);
   const renderer = new WebGLRenderer({ antialias: dpr < 2, powerPreference: "high-performance" });
   renderer.setPixelRatio(dpr);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = PCFShadowMap;
   container.appendChild(renderer.domElement);
-  const camera = new PerspectiveCamera(45, 1, 0.1, 120);
+  const camera = new PerspectiveCamera(45, 1, 0.1, 160);
 
-  const { scene, obstacles } = buildScene();
-  const player = makeCharacter("#ffcf4a");
-  player.position.set(PLAYER_START.x, 0, PLAYER_START.z);
-  player.rotation.y = Math.PI;
-  scene.add(player);
+  const env = buildEnv();
+  const player = makeTrainer(PLAYER_OUTFIT);
+  player.group.position.set(PLAYER_START.x, 0, PLAYER_START.z);
+  player.group.rotation.y = Math.PI;
+  env.scene.add(player.group);
 
   const labels = $("#labels")!;
   const npcs: Npc[] = OPPONENTS.map((opp, index) => {
     const spot = NPC_SPOTS[opp.id];
-    const group = makeCharacter(spot.color, opp.id === "vex");
-    group.position.set(spot.x, spot.platform ? 0.3 : 0, spot.z);
-    group.userData.npc = opp.id;
-    scene.add(group);
-    if (spot.platform) { const p = makePlatform(); p.position.x = spot.x; p.position.z = spot.z; scene.add(p); }
-    obstacles.push({ x: spot.x, z: spot.z, r: 0.5 });
+    const trainer = makeTrainer(npcOutfit(opp.id, spot.color, !!spot.platform));
+    trainer.group.position.set(spot.x, spot.platform ? 0.3 : 0, spot.z);
+    trainer.group.rotation.y = Math.atan2(PLAYER_START.x - spot.x, PLAYER_START.z - spot.z);
+    env.scene.add(trainer.group);
     const label = document.createElement("div");
     label.className = "npc-label";
     labels.appendChild(label);
-    return { opp, index, group, label, x: spot.x, z: spot.z, platform: !!spot.platform };
+    return { opp, index, trainer, label, x: spot.x, z: spot.z, platform: !!spot.platform };
   });
+  const obstacles = [...env.obstacles, ...npcs.map(n => ({ x: n.x, z: n.z, r: 0.5 }))];
 
   /* ---------- Input: thumb stick on touch screens, WASD/arrows on desktop ---------- */
   const stick = new Joystick(renderer.domElement);
@@ -61,12 +62,12 @@ export function createWorld(container: HTMLElement, cb: WorldCallbacks): WorldHa
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
-    const far = camera.aspect < 1 ? 1.7 : 1;
-    camOffset.set(0, 13 * far, 8 * far);
+    const far = camera.aspect < 1 ? 1.55 : 1;
+    camOffset.set(0, 9 * far, 11 * far);
   }
   resize();
   addEventListener("resize", resize);
-  camera.position.copy(player.position).add(camOffset);
+  camera.position.copy(player.group.position).add(camOffset);
 
   const isLocked = (n: Npc) => !S.tuning.alwaysWin && n.index > 0 && !S.beaten.includes(OPPONENTS[n.index - 1].id);
 
@@ -80,46 +81,49 @@ export function createWorld(container: HTMLElement, cb: WorldCallbacks): WorldHa
     if (keys.has("KeyA") || keys.has("ArrowLeft")) mx -= 1;
     if (keys.has("KeyD") || keys.has("ArrowRight")) mx += 1;
     if (!mx && !mz) { mx = stick.value.x; mz = stick.value.y; }
+    const pos = player.group.position;
     // The camera looks north, so screen right is +x and screen down is +z.
     const len = Math.hypot(mx, mz);
     const moving = len > 0;
     if (moving) {
       const speed = WALK_SPEED * Math.min(1, len);
-      player.position.x += (mx / len) * speed * dt;
-      player.position.z += (mz / len) * speed * dt;
+      pos.x += (mx / len) * speed * dt;
+      pos.z += (mz / len) * speed * dt;
       const want = Math.atan2(mx, mz);
-      let diff = want - player.rotation.y;
+      let diff = want - player.group.rotation.y;
       diff = Math.atan2(Math.sin(diff), Math.cos(diff));
-      player.rotation.y += diff * Math.min(1, dt * 12);
+      player.group.rotation.y += diff * Math.min(1, dt * 12);
     }
     for (const o of obstacles) {
-      const dx = player.position.x - o.x, dz = player.position.z - o.z, dist = Math.hypot(dx, dz), min = o.r + BODY_R;
-      if (dist < min && dist > 1e-4) { player.position.x = o.x + (dx / dist) * min; player.position.z = o.z + (dz / dist) * min; }
+      const dx = pos.x - o.x, dz = pos.z - o.z, dist = Math.hypot(dx, dz), min = o.r + BODY_R;
+      if (dist < min && dist > 1e-4) { pos.x = o.x + (dx / dist) * min; pos.z = o.z + (dz / dist) * min; }
     }
-    player.position.x = MathUtils.clamp(player.position.x, -BOUNDS, BOUNDS);
-    player.position.z = MathUtils.clamp(player.position.z, -BOUNDS, BOUNDS);
-    const vexSpot = npcs.find(n => n.platform);
-    player.position.y = vexSpot && Math.hypot(player.position.x - vexSpot.x, player.position.z - vexSpot.z) < 2.5 ? 0.3 : 0;
-    const body = player.getObjectByName("body")!;
-    body.position.y = moving ? Math.abs(Math.sin(now / 110)) * 0.12 : 0;
+    pos.x = MathUtils.clamp(pos.x, -BOUNDS, BOUNDS);
+    pos.z = MathUtils.clamp(pos.z, -BOUNDS, BOUNDS);
+    pos.y += (env.heightAt(pos.x, pos.z) - pos.y) * Math.min(1, dt * 15);
+    const t = now / 1000;
+    player.update(dt, moving ? Math.min(1, len) : 0, t);
+    for (const n of npcs) n.trainer.update(dt, 0, t + n.index * 1.3);
+    env.update(t, pos);
 
-    tmp.copy(player.position).add(camOffset);
+    tmp.copy(pos).add(camOffset);
     camera.position.lerp(tmp, Math.min(1, dt * 5));
-    camera.lookAt(player.position.x, player.position.y + 0.8, player.position.z);
+    camera.lookAt(pos.x, pos.y + 0.8, pos.z);
 
     // Nearest challenger in talking range, and the labels above every challenger.
     near = null;
     let best = TALK_RANGE;
     const w = container.clientWidth, h = container.clientHeight;
     for (const n of npcs) {
-      const d = Math.hypot(player.position.x - n.x, player.position.z - n.z);
+      const g = n.trainer.group;
+      const d = Math.hypot(pos.x - n.x, pos.z - n.z);
       if (d < best) { best = d; near = n; }
       if (d < 5) {
-        const want = Math.atan2(player.position.x - n.x, player.position.z - n.z);
-        let diff = want - n.group.rotation.y; diff = Math.atan2(Math.sin(diff), Math.cos(diff));
-        n.group.rotation.y += diff * Math.min(1, dt * 6);
+        const want = Math.atan2(pos.x - n.x, pos.z - n.z);
+        let diff = want - g.rotation.y; diff = Math.atan2(Math.sin(diff), Math.cos(diff));
+        g.rotation.y += diff * Math.min(1, dt * 6);
       }
-      tmp.set(n.x, n.group.position.y + 2.1, n.z).project(camera);
+      tmp.set(n.x, g.position.y + 2.1, n.z).project(camera);
       const visible = tmp.z < 1 && Math.abs(tmp.x) < 1.1 && Math.abs(tmp.y) < 1.1;
       n.label.style.display = visible ? "" : "none";
       if (visible) {
@@ -129,7 +133,7 @@ export function createWorld(container: HTMLElement, cb: WorldCallbacks): WorldHa
       }
     }
     updateInteract();
-    renderer.render(scene, camera);
+    renderer.render(env.scene, camera);
     raf = requestAnimationFrame(step);
   }
 
@@ -184,6 +188,8 @@ export function createWorld(container: HTMLElement, cb: WorldCallbacks): WorldHa
       raf = requestAnimationFrame(step);
     },
     refresh() { refreshLabels(); nearKey = "~"; },
-    debug: () => ({ x: player.position.x, z: player.position.z, paused }),
+    debug: () => ({ x: player.group.position.x, z: player.group.position.z, paused }),
+    warp(x, z) { player.group.position.set(x, 0, z); camera.position.copy(player.group.position).add(camOffset); },
   };
 }
+
