@@ -71,7 +71,7 @@ async function doFuse(taken: Card, partner: Card) {
   void sample("fusion");
   const helix = startHelix(w.querySelector<HTMLElement>(".fuse-stage")!, taken, partner);
   const res = fuse(taken, partner, S.tuning);
-  const [text, img] = await Promise.all([fusionText(taken, partner, res.outcome), fusionImage(res.child), new Promise(r => setTimeout(r, 2000))]);
+  const [text, img] = await Promise.all([fusionText(taken, partner, res.outcome), fusionImage(res.child, taken, partner), new Promise(r => setTimeout(r, 2000))]);
   await helix.finish();
   const c = { ...res.child, name: text.name, flavor: text.flavor, ...(img ? { art: img.art } : {}) };
   S.stats[res.outcome]++;
