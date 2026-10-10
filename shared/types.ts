@@ -26,6 +26,8 @@ export interface Card {
   flavor: string;
   gen: number;
   outcome: FusionOutcome | null;
+  /** Share of each base monster, in percent (see shared/fusion/ancestry.ts). Missing on base cards and old saves. */
+  ancestry?: Record<string, number>;
 }
 
 export interface CardTemplate {
@@ -46,6 +48,9 @@ export interface Tuning {
   mutMax: number;
   critChance: number;
   botchChance: number;
+  /** Fusion ancestry: ancestors under this share fade out, and at most this many stay. */
+  ancestryMinPct: number;
+  ancestryMax: number;
   /** Timing taps: extra damage on your attacks, in percent. */
   tapPerfectBonus: number;
   tapGoodBonus: number;
